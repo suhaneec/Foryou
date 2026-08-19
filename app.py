@@ -1,5 +1,6 @@
 import time
 import base64
+import textwrap
 import streamlit as st
 from pathlib import Path
 
@@ -42,6 +43,18 @@ Happiest birthday, baby.
 """
 # =========================================================================
 
+
+def md(html: str):
+    """Render a (possibly indented) multi-line HTML/SVG string safely.
+
+    Streamlit's markdown parser treats any HTML block whose first line is
+    indented 4+ spaces as a literal code block instead of parsing it as
+    HTML — which is why raw markup could show up on screen. Dedenting
+    before rendering fixes that everywhere in this app.
+    """
+    st.markdown(textwrap.dedent(html).strip("\n"), unsafe_allow_html=True)
+
+
 st.markdown('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">', unsafe_allow_html=True)
 
 # ---------- Styling ----------
@@ -80,16 +93,16 @@ html, body, [class*="css"] {
 }
 
 .block-container {
-    max-width: 900px;
-    padding-top: 1.6rem;
-    padding-bottom: 5rem;
+    max-width: 760px;
+    padding-top: .9rem;
+    padding-bottom: 2.5rem;
     position: relative;
     z-index: 2;
 }
 
 /* tighten default gap between stacked widgets across the app */
 div[data-testid="stVerticalBlock"] {
-    gap: 0.6rem;
+    gap: .45rem;
 }
 
 h1, h2, h3 {
@@ -126,43 +139,7 @@ p, div, label, span, li {
     100% { transform: translateY(-105vh) translateX(-15px) rotate(-10deg); opacity: 0; }
 }
 
-/* ---------- hero (photos left, text right) ---------- */
-.hero-flex {
-    display: flex;
-    align-items: center;
-    gap: clamp(1.2rem, 4vw, 2.6rem);
-    padding: 1rem .5rem 1.4rem;
-}
-.hero-photos-col {
-    flex: 0 0 auto;
-    width: 44%;
-}
-.hero-text-col {
-    flex: 1 1 auto;
-    text-align: right;
-}
-.photo-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(8px, 1.6vw, 14px);
-}
-.photo-grid img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 14px;
-    border: 3px solid var(--white);
-    box-shadow: 0 10px 24px rgba(124, 63, 168, .28);
-    display: block;
-}
-.photo-grid img.g1 { transform: rotate(-3deg); }
-.photo-grid img.g2 { transform: rotate(2deg); }
-.photo-grid img.g3 { transform: rotate(2deg); }
-.photo-grid img.g4 { transform: rotate(-2deg); }
-.photo-grid img.g5 { transform: rotate(-3deg); }
-.photo-grid img.g6 { transform: rotate(3deg); }
-.photo-grid img.g7 { transform: rotate(-2deg); grid-column: span 2; aspect-ratio: 2 / 1; }
-
+/* ---------- hero (page 1): scattered "hanging" photo collage + centered text ---------- */
 .eyebrow {
     color: var(--pink-500);
     text-transform: uppercase;
@@ -171,36 +148,54 @@ p, div, label, span, li {
     font-weight: 600;
 }
 
-.hero-text-col h1 {
-    font-size: clamp(2.1rem, 6.2vw, 4rem);
-    line-height: 1.08;
-    margin: .5rem 0 1rem;
+.photo-collage {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: clamp(10px, 2.4vw, 18px);
+    padding: .5rem .5rem .3rem;
+}
+.photo-collage img {
+    width: clamp(78px, 15vw, 118px);
+    height: clamp(78px, 15vw, 118px);
+    object-fit: cover;
+    border-radius: 14px;
+    border: 3px solid var(--white);
+    box-shadow: 0 10px 22px rgba(124, 63, 168, .26);
+    display: block;
+}
+.photo-collage img:nth-child(4n+1) { transform: rotate(-5deg) translateY(-2px); }
+.photo-collage img:nth-child(4n+2) { transform: rotate(3deg)  translateY(12px); }
+.photo-collage img:nth-child(4n+3) { transform: rotate(-2deg) translateY(4px); }
+.photo-collage img:nth-child(4n+4) { transform: rotate(4deg)  translateY(-6px); }
+
+.hero-center {
+    text-align: center;
+    padding: .1rem 1rem .3rem;
+}
+.hero-center h1 {
+    font-size: clamp(1.9rem, 6.4vw, 3.4rem);
+    line-height: 1.1;
+    margin: .4rem 0 .6rem;
     background: linear-gradient(100deg, var(--purple-600), var(--pink-500) 55%, var(--purple-500));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
-
-.subtitle {
+.hero-center .subtitle {
+    max-width: 520px;
+    margin: 0 auto;
     color: var(--ink-soft);
-    font-size: 1.02rem;
-    line-height: 1.85;
-}
-
-@media (max-width: 700px) {
-    .hero-flex {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1.3rem;
-    }
-    .hero-photos-col { width: 100%; }
-    .hero-text-col { text-align: center; }
+    font-size: .98rem;
+    line-height: 1.7;
+    text-align: center;
 }
 
 .divider-heart {
     text-align: center;
-    font-size: 1.1rem;
-    margin: 1.1rem 0;
+    font-size: 1.05rem;
+    margin: .8rem 0;
     color: var(--pink-500);
     letter-spacing: 10px;
 }
@@ -210,11 +205,12 @@ p, div, label, span, li {
     background: rgba(255,255,255,.72);
     backdrop-filter: blur(6px);
     border: 1px solid rgba(185, 142, 224, .35);
-    border-radius: 24px;
-    padding: 1.5rem 1.6rem;
-    margin: 1rem 0;
-    box-shadow: 0 14px 40px rgba(124, 63, 168, .12);
+    border-radius: 22px;
+    padding: 1.2rem 1.35rem;
+    margin: .7rem 0;
+    box-shadow: 0 12px 34px rgba(124, 63, 168, .12);
     color: var(--ink);
+    text-align: left;
 }
 
 .card b { color: var(--purple-600); }
@@ -222,73 +218,75 @@ p, div, label, span, li {
 .quote {
     font-family: 'Dancing Script', cursive;
     font-weight: 700;
-    font-size: 2rem;
+    font-size: 1.8rem;
     line-height: 1.4;
     color: var(--purple-700);
     text-align: center;
-    padding: 1.2rem .5rem;
+    padding: .9rem .5rem;
 }
 
 .small {
     color: var(--ink-soft);
     font-size: .92rem;
-    line-height: 1.75;
+    line-height: 1.7;
+    text-align: left;
 }
 
 /* ---------- quiz page ---------- */
 .quiz-q {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 700;
-    font-size: clamp(1.3rem, 4vw, 1.6rem);
+    font-size: clamp(1.2rem, 3.8vw, 1.45rem);
     color: var(--purple-700);
-    margin: .7rem 0 .25rem;
+    margin: .55rem 0 .2rem;
     line-height: 1.25;
+    text-align: left;
 }
 div[data-testid="stRadio"] {
     margin-bottom: -.3rem;
 }
 div[data-testid="stRadio"] > div {
     background: rgba(255,255,255,.55);
-    padding: .45rem .7rem;
+    padding: .4rem .65rem;
     border-radius: 16px;
     border: 1px solid rgba(185, 142, 224, .3);
-    gap: .15rem;
+    gap: .1rem;
 }
 div[data-testid="stRadio"] label,
 div[data-testid="stRadio"] p {
     color: var(--ink) !important;
     font-weight: 500;
-    font-size: 1rem;
+    font-size: .96rem;
 }
 
 /* ---------- photo memories (left photo / right text) ---------- */
 .photo-frame {
     background: var(--white);
-    border-radius: 26px;
-    padding: 12px;
-    box-shadow: 0 18px 45px rgba(124, 63, 168, .18);
+    border-radius: 24px;
+    padding: 10px;
+    box-shadow: 0 16px 40px rgba(124, 63, 168, .18);
     border: 1px solid rgba(255,255,255,.9);
     position: relative;
 }
 
 [data-testid="stImage"] img {
-    border-radius: 18px;
+    border-radius: 16px;
 }
 
 .mem-text-wrap {
     height: 100%;
     display: flex;
     align-items: center;
-    margin-top: .8rem;
+    margin-top: .6rem;
 }
 
 .mem-text-card {
     background: rgba(255,255,255,.72);
     backdrop-filter: blur(6px);
     border: 1px solid rgba(185, 142, 224, .35);
-    border-radius: 22px;
-    padding: 1.3rem 1.4rem;
-    box-shadow: 0 14px 36px rgba(124, 63, 168, .12);
+    border-radius: 20px;
+    padding: 1.1rem 1.2rem;
+    box-shadow: 0 12px 32px rgba(124, 63, 168, .12);
     text-align: left;
     width: 100%;
 }
@@ -297,86 +295,90 @@ div[data-testid="stRadio"] p {
     color: var(--pink-500);
     text-transform: uppercase;
     letter-spacing: 2px;
-    font-size: .68rem;
+    font-size: .66rem;
     font-weight: 600;
 }
 
 .mem-text-card h3 {
-    margin: .25rem 0 .4rem;
-    font-size: clamp(1.2rem, 4vw, 1.45rem);
+    margin: .2rem 0 .35rem;
+    font-size: clamp(1.1rem, 3.6vw, 1.3rem);
+    text-align: left;
 }
 
 .mem-text-card p {
     color: var(--ink-soft);
     margin: 0;
-    font-size: .95rem;
-    line-height: 1.65;
+    font-size: .92rem;
+    line-height: 1.6;
+    text-align: left;
 }
 
 .missing-photo {
     text-align: center;
-    padding: 2.5rem 1rem;
+    padding: 2.2rem 1rem;
     color: var(--purple-500);
     background: rgba(255,255,255,.6);
     border: 1px dashed var(--purple-400);
     border-radius: 20px;
-    font-size: .9rem;
+    font-size: .88rem;
 }
 
 .memory-row {
-    margin-bottom: 1.8rem;
+    margin-bottom: 1.4rem;
 }
 
 /* ---------- "things I hope you never forget" grid ---------- */
 .points-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: .7rem;
-    margin: .6rem 0 .4rem;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: .6rem;
+    margin: .5rem 0 .3rem;
 }
 .point-card {
     background: rgba(255,255,255,.72);
     backdrop-filter: blur(6px);
     border: 1px solid rgba(185, 142, 224, .35);
-    border-radius: 18px;
-    padding: 1rem 1.1rem;
-    box-shadow: 0 10px 28px rgba(124, 63, 168, .1);
+    border-radius: 16px;
+    padding: .85rem 1rem;
+    box-shadow: 0 10px 26px rgba(124, 63, 168, .1);
     display: flex;
-    gap: .6rem;
+    gap: .55rem;
     align-items: flex-start;
+    text-align: left;
 }
 .point-card .point-num {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     color: var(--pink-500);
     line-height: 1;
     flex-shrink: 0;
 }
 .point-card .point-text {
-    font-size: 1.08rem;
-    line-height: 1.5;
+    font-size: 1.02rem;
+    line-height: 1.45;
     color: var(--ink);
     font-weight: 500;
+    text-align: left;
 }
 
 /* ---------- love letter ---------- */
 .letter-card {
     background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(250, 240, 255, .85));
     border: 1px solid rgba(185, 142, 224, .4);
-    border-radius: 26px;
-    padding: 2rem 1.8rem;
-    box-shadow: 0 20px 55px rgba(124, 63, 168, .16);
+    border-radius: 24px;
+    padding: 1.8rem 1.6rem;
+    box-shadow: 0 18px 48px rgba(124, 63, 168, .16);
     position: relative;
 }
 
 .letter-card::before {
     content: "💌";
     position: absolute;
-    top: -18px;
+    top: -16px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 2rem;
+    font-size: 1.8rem;
     background: var(--lavender-100);
     padding: 4px 12px;
     border-radius: 50%;
@@ -385,28 +387,28 @@ div[data-testid="stRadio"] p {
 .letter-text {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
-    font-size: 1.28rem;
-    line-height: 2;
+    font-size: 1.16rem;
+    line-height: 1.85;
     color: var(--ink);
     white-space: pre-line;
     text-align: left;
-    padding-top: .8rem;
+    padding-top: .7rem;
 }
 
 .letter-signoff {
     text-align: right;
     font-family: 'Dancing Script', cursive;
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     color: var(--purple-600);
-    margin-top: .5rem;
+    margin-top: .4rem;
 }
 
 /* ---------- flip card (final page) ---------- */
 .flip-card {
     perspective: 1200px;
     width: 100%;
-    max-width: 420px;
-    margin: 1rem auto 1.5rem;
+    max-width: 380px;
+    margin: .8rem auto 1.2rem;
 }
 .flip-toggle-input { display: none; }
 .flip-card-inner {
@@ -426,8 +428,8 @@ div[data-testid="stRadio"] p {
     inset: 0;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    border-radius: 26px;
-    box-shadow: 0 18px 45px rgba(124, 63, 168, .2);
+    border-radius: 24px;
+    box-shadow: 0 16px 40px rgba(124, 63, 168, .2);
     overflow: hidden;
 }
 .flip-card-front {
@@ -447,15 +449,15 @@ div[data-testid="stRadio"] p {
     text-align: center;
     color: var(--white);
     background: rgba(94, 43, 131, .6);
-    padding: .6rem;
-    font-size: .82rem;
+    padding: .55rem;
+    font-size: .8rem;
     font-weight: 600;
     letter-spacing: .3px;
 }
 .flip-card-back {
     transform: rotateY(180deg);
     background: linear-gradient(160deg, rgba(255,255,255,.96), rgba(246,235,252,.94));
-    padding: 1.7rem 1.4rem;
+    padding: 1.5rem 1.3rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -464,33 +466,33 @@ div[data-testid="stRadio"] p {
 }
 .flip-card-back .eyebrow { margin-bottom: .2rem; }
 .flip-card-back h1 {
-    font-size: clamp(2rem, 8vw, 3rem);
-    margin: .3rem 0;
+    font-size: clamp(1.8rem, 7.5vw, 2.7rem);
+    margin: .25rem 0;
     background: linear-gradient(100deg, var(--purple-600), var(--pink-500) 55%, var(--purple-500));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 .flip-card-back p {
-    font-size: .92rem;
-    line-height: 1.75;
+    font-size: .9rem;
+    line-height: 1.7;
     color: var(--ink-soft);
     margin: 0;
 }
 .flip-card-back .quote {
-    font-size: 1.35rem;
-    padding: .6rem 0;
+    font-size: 1.25rem;
+    padding: .5rem 0;
 }
 
 /* ---------- final page ---------- */
 .final {
     text-align: center;
-    padding: 1.8rem 1rem 1rem;
+    padding: 1.4rem 1rem .8rem;
 }
 
 .final h1 {
-    font-size: clamp(3rem, 10vw, 6rem);
-    margin: .5rem 0;
+    font-size: clamp(2.6rem, 9vw, 5rem);
+    margin: .4rem 0;
     background: linear-gradient(100deg, var(--purple-600), var(--pink-500) 55%, var(--purple-500));
     -webkit-background-clip: text;
     background-clip: text;
@@ -499,16 +501,16 @@ div[data-testid="stRadio"] p {
 
 .final p {
     color: var(--ink-soft);
-    line-height: 1.85;
-    font-size: 1.02rem;
+    line-height: 1.8;
+    font-size: 1rem;
 }
 
 /* ---------- cake cutting ---------- */
 .cake-wrap {
     display: flex;
     justify-content: center;
-    margin: .6rem auto 1rem;
-    max-width: 460px;
+    margin: .5rem auto .8rem;
+    max-width: 400px;
 }
 .cake-svg {
     width: 100%;
@@ -516,31 +518,35 @@ div[data-testid="stRadio"] p {
     overflow: visible;
 }
 .knife-group {
-    transform-origin: 0 0;
+    transform-origin: 100px 8px;
 }
 .knife-idle {
     animation: knifeBob 2.4s ease-in-out infinite;
-    transform-origin: 340px 40px;
 }
 @keyframes knifeBob {
-    0%, 100% { transform: translate(0,0) rotate(-32deg); }
-    50%      { transform: translate(-4px,6px) rotate(-38deg); }
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    50%      { transform: translate(-3px,5px) rotate(-6deg); }
 }
 .knife-cutting {
     animation: knifePlunge 1.15s cubic-bezier(.5,.05,.4,1) forwards;
 }
 @keyframes knifePlunge {
-    0%   { transform: translate(60px,-70px) rotate(-40deg); opacity: 0; }
+    0%   { transform: translate(35px,-55px) rotate(-14deg); opacity: 0; }
     18%  { opacity: 1; }
-    55%  { transform: translate(-6px,86px) rotate(-40deg); }
-    72%  { transform: translate(-2px,96px) rotate(-30deg); }
-    100% { transform: translate(-4px,92px) rotate(-33deg); }
+    55%  { transform: translate(-68px,72px) rotate(6deg); }
+    100% { transform: translate(-64px,80px) rotate(3deg); }
+}
+.knife-done {
+    transform: translate(-64px,80px) rotate(3deg);
 }
 .wedge-overlay {
     transform-origin: 200px 200px;
 }
 .wedge-overlay.sliced {
     animation: sliceAway 1.05s ease-in .42s forwards;
+}
+.wedge-overlay.sliced-done {
+    opacity: 0;
 }
 @keyframes sliceAway {
     0%   { transform: translate(0,0) rotate(0deg); opacity: 1; }
@@ -552,6 +558,9 @@ div[data-testid="stRadio"] p {
 .landed-slice.show {
     animation: fadeInSlice .7s ease forwards;
     animation-delay: 1.35s;
+}
+.landed-slice.show-static {
+    opacity: 1;
 }
 @keyframes fadeInSlice {
     from { opacity: 0; transform: translateY(6px); }
@@ -570,9 +579,9 @@ div[data-testid="stRadio"] p {
 .progress-text {
     text-align: center;
     color: var(--ink-soft);
-    font-size: .74rem;
+    font-size: .72rem;
     letter-spacing: 1.5px;
-    margin-bottom: .5rem;
+    margin-bottom: .4rem;
     font-weight: 600;
 }
 
@@ -591,8 +600,8 @@ div.stButton > button {
     background: linear-gradient(90deg, var(--pink-500), var(--purple-600));
     color: var(--white);
     font-weight: 600;
-    min-height: 3rem;
-    box-shadow: 0 10px 28px rgba(155, 92, 199, .3);
+    min-height: 2.8rem;
+    box-shadow: 0 10px 26px rgba(155, 92, 199, .3);
     transition: all .15s ease;
 }
 
@@ -603,7 +612,7 @@ div.stButton > button p {
 div.stButton > button:hover {
     filter: brightness(1.06);
     transform: translateY(-2px);
-    box-shadow: 0 14px 34px rgba(155, 92, 199, .4);
+    box-shadow: 0 14px 32px rgba(155, 92, 199, .4);
 }
 
 div.stButton > button:disabled {
@@ -621,9 +630,9 @@ div.stButton > button:disabled p {
 .lock-hint {
     text-align: center;
     color: var(--pink-500);
-    font-size: .82rem;
+    font-size: .8rem;
     font-weight: 500;
-    margin-top: .6rem;
+    margin-top: .5rem;
     animation: pulseHint 1.8s ease-in-out infinite;
 }
 
@@ -659,19 +668,19 @@ div[data-testid="stAlert"] {
 .footer {
     text-align: center;
     color: var(--purple-500);
-    font-size: .75rem;
-    padding-top: 2.2rem;
+    font-size: .72rem;
+    padding-top: 1.6rem;
     letter-spacing: .5px;
 }
 
 /* ---------- small-screen tightening ---------- */
 @media (max-width: 480px) {
-    .block-container { padding-left: .9rem; padding-right: .9rem; }
-    .card { padding: 1.1rem 1.15rem; }
-    .letter-card { padding: 1.6rem 1.2rem; }
-    .letter-text { font-size: 1.05rem; line-height: 1.85; }
-    .point-card { padding: .85rem .9rem; }
-    .point-card .point-text { font-size: 1rem; }
+    .block-container { padding-left: .8rem; padding-right: .8rem; }
+    .card { padding: 1rem 1.05rem; }
+    .letter-card { padding: 1.4rem 1.05rem; }
+    .letter-text { font-size: 1rem; line-height: 1.75; }
+    .point-card { padding: .75rem .85rem; }
+    .point-card .point-text { font-size: .96rem; }
 }
 </style>
 
@@ -715,7 +724,7 @@ def nav(unlocked=True, lock_msg="Finish the task above to unlock this 💭"):
                 else:
                     st.button("🔒 Continue →", disabled=True, key=f"next_locked_{st.session_state.page}")
         if not unlocked and st.session_state.page < TOTAL - 1:
-            st.markdown(f'<div class="lock-hint">{lock_msg}</div>', unsafe_allow_html=True)
+            md(f'<div class="lock-hint">{lock_msg}</div>')
     elif st.session_state.page == 0:
         st.button("Open your birthday surprise →", on_click=next_page, key="start")
 
@@ -723,55 +732,49 @@ def img_to_base64(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
 
+def find_asset(name):
+    """Look for name + a known extension inside the assets folder."""
+    exts = [".jpeg", ".jpg", ".png", ".JPEG", ".JPG", ".PNG"]
+    for ext in exts:
+        candidate = ASSETS / f"{name}{ext}"
+        if candidate.exists():
+            mime = "png" if ext.lower() == ".png" else "jpeg"
+            return candidate, mime
+    return None, None
+
 def photo(name):
     """Display an image, using a container width that works across
     Streamlit versions, with a friendly placeholder if it's missing."""
     path = ASSETS / name
-    st.markdown('<div class="photo-frame">', unsafe_allow_html=True)
+    md('<div class="photo-frame">')
     if path.exists():
         try:
             st.image(str(path), use_container_width=True)
         except TypeError:
             st.image(str(path))
     else:
-        st.markdown(
-            f'<div class="missing-photo">💜 Photo "{name}" not found in the assets folder 💜</div>',
-            unsafe_allow_html=True,
-        )
-    st.markdown('</div>', unsafe_allow_html=True)
+        md(f'<div class="missing-photo">💜 Photo "{name}" not found in the assets folder 💜</div>')
+    md('</div>')
 
-def photo_grid_html():
-    """Bigger photo grid for the left side of the hero section."""
-    names = ["hero_1", "hero_2", "hero_3", "hero_4",
-             "hero_5", "hero_6", "hero_7", "hero_8"]
-    exts = [".jpeg", ".jpg", ".png", ".JPEG", ".JPG", ".PNG"]
-    mime = {".jpeg": "jpeg", ".jpg": "jpeg", ".png": "png",
-             ".JPEG": "jpeg", ".JPG": "jpeg", ".PNG": "png"}
+def collage_html(names):
+    """A row of small rotated 'hanging' polaroid-style photos for the hero."""
     imgs = []
-    for i, n in enumerate(names, 1):
-        found = None
-        for ext in exts:
-            for candidate in (ASSETS / f"{n}{ext}", ASSETS / f"{n}{ext}{ext}"):
-                if candidate.exists():
-                    found = (candidate, mime[ext])
-                    break
-            if found:
-                break
-        if found:
-            path, m = found
+    for n in names:
+        path, mime = find_asset(n)
+        if path:
             b64 = img_to_base64(path)
-            imgs.append(f'<img class="g{i}" src="data:image/{m};base64,{b64}">')
+            imgs.append(f'<img src="data:image/{mime};base64,{b64}">')
     if not imgs:
         return ""
-    return '<div class="photo-grid">' + "".join(imgs) + '</div>'
+    return '<div class="photo-collage">' + "".join(imgs) + '</div>'
 
 def memory_row(name, tag, title, text):
-    st.markdown('<div class="memory-row">', unsafe_allow_html=True)
+    md('<div class="memory-row">')
     col1, col2 = st.columns([1, 1])
     with col1:
         photo(name)
     with col2:
-        st.markdown(f"""
+        md(f"""
         <div class="mem-text-wrap">
             <div class="mem-text-card">
                 <div class="mem-tag">{tag}</div>
@@ -779,16 +782,23 @@ def memory_row(name, tag, title, text):
                 <p>{text}</p>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        """)
+    md('</div>')
 
-def cake_svg(cutting=False):
-    """A hand-drawn SVG birthday cake with a knife. When cutting=True the
-    knife plunges in and a slice animates away, revealing a layered
-    cross-section — and a little slice lands beside the cake."""
-    knife_class = "knife-cutting" if cutting else "knife-idle"
-    wedge_class = "wedge-overlay sliced" if cutting else "wedge-overlay"
-    landed_class = "landed-slice show" if cutting else "landed-slice"
+def cake_svg(state="idle"):
+    """A hand-drawn SVG birthday cake with a knife.
+
+    state:
+      "idle"    - knife hovers/bobs above the whole cake
+      "cutting" - knife plunges in once and a slice animates away
+      "done"    - static end-state (already cut), no animation replay
+    """
+    if state == "cutting":
+        knife_class, wedge_class, landed_class = "knife-cutting", "wedge-overlay sliced", "landed-slice show"
+    elif state == "done":
+        knife_class, wedge_class, landed_class = "knife-done", "wedge-overlay sliced-done", "landed-slice show-static"
+    else:
+        knife_class, wedge_class, landed_class = "knife-idle", "wedge-overlay", "landed-slice"
 
     return f"""
     <div class="cake-wrap">
@@ -852,10 +862,12 @@ def cake_svg(cutting=False):
         <ellipse class="candle-flame" cx="250" cy="92" rx="5" ry="9" fill="url(#flameGrad)"/>
       </g>
 
-      <g class="knife-group {knife_class}">
-        <rect x="0" y="0" width="128" height="16" rx="5" fill="#e7e2ef" stroke="#c9c1da" stroke-width="1.5"/>
-        <rect x="-42" y="-5" width="46" height="26" rx="9" fill="#5e2b83"/>
-        <rect x="-30" y="-1" width="24" height="18" rx="6" fill="#7c3fa8"/>
+      <g transform="translate(300,20) rotate(-28)">
+        <g class="knife-group {knife_class}">
+          <rect x="0" y="0" width="128" height="16" rx="5" fill="#e7e2ef" stroke="#c9c1da" stroke-width="1.5"/>
+          <rect x="-42" y="-5" width="46" height="26" rx="9" fill="#5e2b83"/>
+          <rect x="-30" y="-1" width="24" height="18" rx="6" fill="#7c3fa8"/>
+        </g>
       </g>
     </svg>
     </div>
@@ -865,31 +877,28 @@ def cake_svg(cutting=False):
 page = st.session_state.page
 
 if page > 0:
-    st.markdown(f'<div class="progress-text">YOUR BIRTHDAY JOURNEY · {page}/{TOTAL-1}</div>', unsafe_allow_html=True)
+    md(f'<div class="progress-text">YOUR BIRTHDAY JOURNEY · {page}/{TOTAL-1}</div>')
     st.progress(page / (TOTAL - 1))
 
 if page == 0:
-    st.markdown(f"""
-    <div class="hero-flex">
-        <div class="hero-photos-col">{photo_grid_html()}</div>
-        <div class="hero-text-col">
-            <div class="eyebrow">A tiny corner of the internet · made only for you</div>
-            <h1>20th August,<br>Happiest Birthday, Bunny</h1>
-            <div class="subtitle">
-                Before you go any further, I just want you to know —
-                a great deal of love went into building this, one page at a time.
-            </div>
-        </div>
+    md('<div class="eyebrow" style="text-align:center;">A tiny corner of the internet · made only for you</div>')
+    md(collage_html(["hero_1", "hero_2", "hero_3", "hero_4"]))
+    md("""
+    <div class="hero-center">
+        <h1>20th August,<br>Happiest Birthday, Bunny</h1>
+        <div class="subtitle">Before you go any further, I just want you to know —
+        a great deal of love went into building this, one page at a time.</div>
     </div>
-    """, unsafe_allow_html=True)
-    st.markdown('<div class="quote">"Celebrating you every day — but today is entirely yours. I just made a little of it about how much I adore you."</div>', unsafe_allow_html=True)
-    st.markdown('<div class="divider-heart">💜 · 💗 · 💜</div>', unsafe_allow_html=True)
+    """)
+    md(collage_html(["hero_5", "hero_6", "hero_7", "hero_8"]))
+    md('<div class="quote">"Celebrating you every day — but today is entirely yours. I just made a little of it about how much I adore you."</div>')
+    md('<div class="divider-heart">💜 · 💗 · 💜</div>')
     st.caption("Fair warning: you can't skip ahead. Every page has a tiny task waiting for you. 😌")
     nav()
 
 elif page == 1:
     st.markdown("## A small question, just for you")
-    st.markdown('<div class="card"><div class="small">There are no wrong answers here — only the one I already know is right. 💜</div></div>', unsafe_allow_html=True)
+    md('<div class="card"><div class="small">There are no wrong answers here — only the one I already know is right. 💜</div></div>')
     name = st.text_input("What does your favourite person call you?", placeholder="Type your answer here...")
     if st.button("This is definitely me 😌"):
         if name.strip():
@@ -906,19 +915,19 @@ elif page == 2:
     st.markdown("## How well do you know us? 🎲")
     st.caption("A tiny, playful relationship quiz. No cheating — I'll know. 💗")
 
-    st.markdown('<div class="quiz-q">1. In a dance-off with zero practice, who takes the win?</div>', unsafe_allow_html=True)
+    md('<div class="quiz-q">1. In a dance-off with zero practice, who takes the win?</div>')
     q1 = st.radio("q1", ["Me, no contest 💃", "You, no contest 🕺", "We'd both lose spectacularly"],
                    index=None, label_visibility="collapsed", key="q1_widget")
 
-    st.markdown('<div class="quiz-q">2. Who\'s more likely to text "you up?" at 1am?</div>', unsafe_allow_html=True)
+    md('<div class="quiz-q">2. Who\'s more likely to text "you up?" at 1am?</div>')
     q2 = st.radio("q2", ["Me, guilty as charged", "You, guilty as charged", "Both of us, shamelessly"],
                    index=None, label_visibility="collapsed", key="q2_widget")
 
-    st.markdown('<div class="quiz-q">3. Stranded on a desert island, who packs snacks and who packs snacks... for the vibes?</div>', unsafe_allow_html=True)
+    md('<div class="quiz-q">3. Stranded on a desert island, who packs snacks and who packs snacks... for the vibes?</div>')
     q3 = st.radio("q3", ["Me — practical to a fault", "You — practical to a fault", "Neither of us survives a week"],
                    index=None, label_visibility="collapsed", key="q3_widget")
 
-    st.markdown('<div class="quiz-q">4. Real talk — who loves the other person a little more?</div>', unsafe_allow_html=True)
+    md('<div class="quiz-q">4. Real talk — who loves the other person a little more?</div>')
     q4 = st.radio("q4", ["Me 💜", "You 💜", "Honestly, both"],
                    index=None, label_visibility="collapsed", key="q4_widget")
 
@@ -937,22 +946,22 @@ elif page == 2:
             verdict = "See? I've been telling you this the whole time. 💜"
         else:
             verdict = "The most diplomatic answer in relationship history. Respect. 🫡"
-        st.markdown(f"""
+        md(f"""
         <div class="card">
             <div class="small">
                 According to you: <b>{a['q1']}</b> wins the dance-off, and <b>{a['q2']}</b>
                 sends the risky 1am text. Noted and filed away. 📝
             </div>
-            <div class="quote" style="font-size:1.3rem;">{verdict}</div>
+            <div class="quote" style="font-size:1.25rem;">{verdict}</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     unlocked = "q4" in st.session_state.answers
     nav(unlocked, "Submit your answers first, sneaky 👀")
 
 elif page == 3:
     st.markdown("## A few of my favourite versions/memories of us")
-    st.markdown('<div class="small">Some memories deserve more than just a place in the camera roll — they deserve a little home of their own.</div>', unsafe_allow_html=True)
+    md('<div class="small">Some memories deserve more than just a place in the camera roll — they deserve a little home of their own.</div>')
 
     memory_row(
         "first_trip.jpeg",
@@ -989,15 +998,10 @@ elif page == 4:
         "I hope you never forget how capable you truly are. You are the softest guy that i dreamt of.",
         "And on the days you do forget — I'll be here to remind you. 💜",
     ]
-    cards_html = '<div class="points-grid">'
+    cards = []
     for i, text in enumerate(points, 1):
-        cards_html += f'''
-        <div class="point-card">
-            <div class="point-num">{i:02}</div>
-            <div class="point-text">{text}</div>
-        </div>'''
-    cards_html += '</div>'
-    st.markdown(cards_html, unsafe_allow_html=True)
+        cards.append(f'<div class="point-card"><div class="point-num">{i:02}</div><div class="point-text">{text}</div></div>')
+    md('<div class="points-grid">' + "".join(cards) + '</div>')
     nav()
 
 elif page == 5:
@@ -1016,45 +1020,53 @@ elif page == 5:
             st.balloons()
     if "surprise" in st.session_state.answers:
         message = choices[st.session_state.answers["surprise"]]
-        st.markdown(f'<div class="card"><div class="quote">{message}</div></div>', unsafe_allow_html=True)
+        md(f'<div class="card"><div class="quote">{message}</div></div>')
 
     unlocked = "surprise" in st.session_state.answers
     nav(unlocked, "Pick a surprise above to continue 🎁")
 
 elif page == 6:
     st.markdown("## One last thing before the letter...")
-    st.markdown('<div class="hero"><div class="subtitle">You have one important birthday duty left to perform.</div><h1 style="font-family:\'Cormorant Garamond\',serif;text-align:center;background:linear-gradient(100deg,var(--purple-600),var(--pink-500) 55%,var(--purple-500));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(2.4rem,7vw,4rem);">Cut the Cake</h1></div>', unsafe_allow_html=True)
+    md("""
+    <div style="text-align:center;">
+        <div class="subtitle">You have one important birthday duty left to perform.</div>
+        <h1 style="font-family:'Cormorant Garamond',serif;background:linear-gradient(100deg,var(--purple-600),var(--pink-500) 55%,var(--purple-500));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(2.2rem,7vw,3.6rem);margin:.4rem 0;">Cut the Cake</h1>
+    </div>
+    """)
 
     cut = st.session_state.answers.get("cake", False)
-    st.markdown(cake_svg(cutting=cut), unsafe_allow_html=True)
 
     if not cut:
+        md(cake_svg(state="idle"))
         st.caption("Fun fact: virtual cake has zero calories. Cut freely. 🍰")
         if st.button("🔪 Cut the cake 🎂"):
             st.session_state.answers["cake"] = True
+            st.session_state["cake_just_cut"] = True
             st.rerun()
     else:
+        just_cut = st.session_state.pop("cake_just_cut", False)
+        md(cake_svg(state="cutting" if just_cut else "done"))
         st.balloons()
-        st.markdown("""
+        md("""
         <div class="final">
-            <div style="font-size:4.5rem;">🎂✨💜</div>
+            <div style="font-size:4rem;">🎂✨💜</div>
             <h1>IT'S YOUR DAY!</h1>
             <p>Make a wish — I have a feeling I already know mine. 💜</p>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     unlocked = cut
     nav(unlocked, "You must cut the cake first — no shortcuts 🎂")
 
 elif page == 7:
     st.markdown("## The Letter")
-    st.markdown('<div class="small">Everything else on this little site was just the build-up. This part, I mean with my whole heart.</div>', unsafe_allow_html=True)
-    st.markdown(f"""
+    md('<div class="small">Everything else on this little site was just the build-up. This part, I mean with my whole heart.</div>')
+    md(f"""
     <div class="letter-card">
         <div class="letter-text">{FINAL_LETTER.strip()}</div>
         <div class="letter-signoff">— always yours 💜</div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
     st.write("")
     felt = st.checkbox("I felt every word of this 💜", key="felt_letter")
     nav(felt, "Take a moment, then check the box above 💭")
@@ -1070,7 +1082,7 @@ elif page == 8:
     else:
         front_html = '<div class="missing-photo">💜 Photo "birthday_final.jpeg" not found in the assets folder 💜</div>'
 
-    st.markdown(f"""
+    md(f"""
     <div class="flip-card">
         <input type="checkbox" id="flipToggle" class="flip-toggle-input">
         <label for="flipToggle" class="flip-card-inner">
@@ -1087,10 +1099,10 @@ elif page == 8:
                     Biggest biwrthday hugs and kisses to you.
                 </p>
                 <div class="quote">"And yes... I would choose you again."</div>
-                <div style="font-size:2rem;">💜 💗 🎂 💗 💜</div>
+                <div style="font-size:1.8rem;">💜 💗 🎂 💗 💜</div>
             </div>
         </label>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
-st.markdown('<div class="footer">Made with an unreasonable amount of love 💜</div>', unsafe_allow_html=True)
+md('<div class="footer">Made with an unreasonable amount of love 💜</div>')
