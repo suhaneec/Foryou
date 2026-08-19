@@ -149,6 +149,32 @@ p, div, label, span, li {
     line-height: 1.85;
 }
 
+/* ---------- scattered photo collage (hero) ---------- */
+.photo-scatter {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: clamp(6px, 2vw, 14px);
+    flex-wrap: wrap;
+    margin: .5rem 0 -.5rem;
+}
+.scatter-img {
+    width: clamp(44px, 12vw, 66px);
+    height: clamp(44px, 12vw, 66px);
+    object-fit: cover;
+    border-radius: 10px;
+    border: 3px solid var(--white);
+    box-shadow: 0 8px 20px rgba(124, 63, 168, .28);
+}
+.scatter-img.s1 { transform: rotate(-9deg) translateY(6px); }
+.scatter-img.s2 { transform: rotate(6deg) translateY(-6px); }
+.scatter-img.s3 { transform: rotate(-4deg) translateY(8px); }
+.scatter-img.s4 { transform: rotate(8deg) translateY(-3px); }
+.scatter-img.s5 { transform: rotate(-6deg) translateY(4px); }
+.scatter-img.s6 { transform: rotate(5deg) translateY(7px); }
+.scatter-img.s7 { transform: rotate(-8deg) translateY(-4px); }
+.scatter-img.s8 { transform: rotate(7deg) translateY(2px); }
+
 .divider-heart {
     text-align: center;
     font-size: 1.1rem;
@@ -573,6 +599,25 @@ def photo(name):
         )
     st.markdown('</div>', unsafe_allow_html=True)
 
+def photo_scatter_html():
+    """Small scattered polaroid-style photos for the hero page."""
+    names = ["hero_1", "hero_2", "hero_3", "hero_4",
+             "hero_5", "hero_6", "hero_7", "hero_8"]
+    exts = [".jpeg", ".jpg", ".png", ".JPEG", ".JPG", ".PNG"]
+    mime = {".jpeg": "jpeg", ".jpg": "jpeg", ".png": "png",
+             ".JPEG": "jpeg", ".JPG": "jpeg", ".PNG": "png"}
+    imgs = []
+    for i, n in enumerate(names, 1):
+        for ext in exts:
+            p = ASSETS / f"{n}{ext}"
+            if p.exists():
+                b64 = img_to_base64(p)
+                imgs.append(f'<img class="scatter-img s{i}" src="data:image/{mime[ext]};base64,{b64}">')
+                break
+    if not imgs:
+        return ""
+    return '<div class="photo-scatter">' + "".join(imgs) + '</div>'
+
 def memory_row(name, tag, title, text):
     st.markdown('<div class="memory-row">', unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1])
@@ -598,6 +643,7 @@ if page > 0:
     st.progress(page / (TOTAL - 1))
 
 if page == 0:
+    st.markdown(photo_scatter_html(), unsafe_allow_html=True)
     st.markdown("""
     <div class="hero">
         <div class="eyebrow">A tiny corner of the internet · made only for you</div>
