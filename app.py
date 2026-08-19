@@ -42,6 +42,8 @@ Happiest birthday, baby.
 """
 # =========================================================================
 
+st.markdown('<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">', unsafe_allow_html=True)
+
 # ---------- Styling ----------
 st.markdown("""
 <style>
@@ -122,7 +124,7 @@ p, div, label, span, li {
 /* ---------- hero ---------- */
 .hero {
     text-align: center;
-    padding: 2.2rem 1rem 1.2rem;
+    padding: 0.6rem 1rem 1.2rem;
 }
 
 .eyebrow {
@@ -134,8 +136,8 @@ p, div, label, span, li {
 }
 
 .hero h1 {
-    font-size: clamp(2.7rem, 8.5vw, 5.4rem);
-    line-height: 1.05;
+    font-size: clamp(2.4rem, 8vw, 5.4rem);
+    line-height: 1.08;
     margin: .5rem 0 1rem;
     background: linear-gradient(100deg, var(--purple-600), var(--pink-500) 55%, var(--purple-500));
     -webkit-background-clip: text;
@@ -150,30 +152,36 @@ p, div, label, span, li {
 }
 
 /* ---------- scattered photo collage (hero) ---------- */
+.hero-photos-wrap {
+    padding-top: .4rem;
+}
 .photo-scatter {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    gap: clamp(6px, 2vw, 14px);
+    gap: clamp(10px, 3vw, 20px);
     flex-wrap: wrap;
-    margin: .5rem 0 -.5rem;
+    margin: 0 auto 2rem;
+    padding: 0 .5rem;
+    max-width: 640px;
 }
 .scatter-img {
-    width: clamp(44px, 12vw, 66px);
-    height: clamp(44px, 12vw, 66px);
+    width: clamp(54px, 15vw, 76px);
+    height: clamp(54px, 15vw, 76px);
     object-fit: cover;
-    border-radius: 10px;
+    border-radius: 12px;
     border: 3px solid var(--white);
     box-shadow: 0 8px 20px rgba(124, 63, 168, .28);
+    flex-shrink: 0;
 }
-.scatter-img.s1 { transform: rotate(-9deg) translateY(6px); }
-.scatter-img.s2 { transform: rotate(6deg) translateY(-6px); }
-.scatter-img.s3 { transform: rotate(-4deg) translateY(8px); }
-.scatter-img.s4 { transform: rotate(8deg) translateY(-3px); }
-.scatter-img.s5 { transform: rotate(-6deg) translateY(4px); }
-.scatter-img.s6 { transform: rotate(5deg) translateY(7px); }
-.scatter-img.s7 { transform: rotate(-8deg) translateY(-4px); }
-.scatter-img.s8 { transform: rotate(7deg) translateY(2px); }
+.scatter-img.s1 { transform: rotate(-6deg) translateY(4px); }
+.scatter-img.s2 { transform: rotate(4deg) translateY(-4px); }
+.scatter-img.s3 { transform: rotate(-3deg) translateY(5px); }
+.scatter-img.s4 { transform: rotate(5deg) translateY(-2px); }
+.scatter-img.s5 { transform: rotate(-4deg) translateY(3px); }
+.scatter-img.s6 { transform: rotate(3deg) translateY(4px); }
+.scatter-img.s7 { transform: rotate(-5deg) translateY(-3px); }
+.scatter-img.s8 { transform: rotate(4deg) translateY(1px); }
 
 .divider-heart {
     text-align: center;
@@ -231,6 +239,7 @@ p, div, label, span, li {
     height: 100%;
     display: flex;
     align-items: center;
+    margin-top: .8rem;
 }
 
 .mem-text-card {
@@ -254,7 +263,7 @@ p, div, label, span, li {
 
 .mem-text-card h3 {
     margin: .25rem 0 .4rem;
-    font-size: 1.45rem;
+    font-size: clamp(1.2rem, 4vw, 1.45rem);
 }
 
 .mem-text-card p {
@@ -276,6 +285,39 @@ p, div, label, span, li {
 
 .memory-row {
     margin-bottom: 1.8rem;
+}
+
+/* ---------- "things I hope you never forget" grid ---------- */
+.points-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: .7rem;
+    margin: .6rem 0 .4rem;
+}
+.point-card {
+    background: rgba(255,255,255,.72);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(185, 142, 224, .35);
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 10px 28px rgba(124, 63, 168, .1);
+    display: flex;
+    gap: .6rem;
+    align-items: flex-start;
+}
+.point-card .point-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--pink-500);
+    line-height: 1;
+    flex-shrink: 0;
+}
+.point-card .point-text {
+    font-size: 1.08rem;
+    line-height: 1.5;
+    color: var(--ink);
+    font-weight: 500;
 }
 
 /* ---------- love letter ---------- */
@@ -421,6 +463,69 @@ p, div, label, span, li {
     font-size: 1.02rem;
 }
 
+/* ---------- cake cutting ---------- */
+.cake-wrap {
+    display: flex;
+    justify-content: center;
+    margin: .6rem auto 1rem;
+    max-width: 460px;
+}
+.cake-svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+.knife-group {
+    transform-origin: 0 0;
+}
+.knife-idle {
+    animation: knifeBob 2.4s ease-in-out infinite;
+    transform-origin: 340px 40px;
+}
+@keyframes knifeBob {
+    0%, 100% { transform: translate(0,0) rotate(-32deg); }
+    50%      { transform: translate(-4px,6px) rotate(-38deg); }
+}
+.knife-cutting {
+    animation: knifePlunge 1.15s cubic-bezier(.5,.05,.4,1) forwards;
+}
+@keyframes knifePlunge {
+    0%   { transform: translate(60px,-70px) rotate(-40deg); opacity: 0; }
+    18%  { opacity: 1; }
+    55%  { transform: translate(-6px,86px) rotate(-40deg); }
+    72%  { transform: translate(-2px,96px) rotate(-30deg); }
+    100% { transform: translate(-4px,92px) rotate(-33deg); }
+}
+.wedge-overlay {
+    transform-origin: 200px 200px;
+}
+.wedge-overlay.sliced {
+    animation: sliceAway 1.05s ease-in .42s forwards;
+}
+@keyframes sliceAway {
+    0%   { transform: translate(0,0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(105px,60px) rotate(26deg); opacity: 0; }
+}
+.landed-slice {
+    opacity: 0;
+}
+.landed-slice.show {
+    animation: fadeInSlice .7s ease forwards;
+    animation-delay: 1.35s;
+}
+@keyframes fadeInSlice {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.candle-flame {
+    animation: flicker 1.1s ease-in-out infinite;
+    transform-origin: bottom center;
+}
+@keyframes flicker {
+    0%, 100% { transform: scaleY(1) scaleX(1); opacity: 1; }
+    50%      { transform: scaleY(1.15) scaleX(.92); opacity: .85; }
+}
+
 /* ---------- progress ---------- */
 .progress-text {
     text-align: center;
@@ -531,6 +636,16 @@ div[data-testid="stAlert"] {
     padding-top: 2.2rem;
     letter-spacing: .5px;
 }
+
+/* ---------- small-screen tightening ---------- */
+@media (max-width: 480px) {
+    .block-container { padding-left: .9rem; padding-right: .9rem; }
+    .card { padding: 1.1rem 1.15rem; }
+    .letter-card { padding: 1.6rem 1.2rem; }
+    .letter-text { font-size: 1.05rem; line-height: 1.85; }
+    .point-card { padding: .85rem .9rem; }
+    .point-card .point-text { font-size: 1rem; }
+}
 </style>
 
 <div class="hearts-bg">
@@ -610,9 +725,6 @@ def photo_scatter_html():
     for i, n in enumerate(names, 1):
         found = None
         for ext in exts:
-            # try normal name first (hero_1.jpeg), then the
-            # accidental double-extension version some uploads get
-            # (hero_1.jpeg.jpeg)
             for candidate in (ASSETS / f"{n}{ext}", ASSETS / f"{n}{ext}{ext}"):
                 if candidate.exists():
                     found = (candidate, mime[ext])
@@ -625,7 +737,7 @@ def photo_scatter_html():
             imgs.append(f'<img class="scatter-img s{i}" src="data:image/{m};base64,{b64}">')
     if not imgs:
         return ""
-    return '<div class="photo-scatter">' + "".join(imgs) + '</div>'
+    return '<div class="hero-photos-wrap"><div class="photo-scatter">' + "".join(imgs) + '</div></div>'
 
 def memory_row(name, tag, title, text):
     st.markdown('<div class="memory-row">', unsafe_allow_html=True)
@@ -644,6 +756,94 @@ def memory_row(name, tag, title, text):
         """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
+def cake_svg(cutting=False):
+    """A hand-drawn SVG birthday cake with a knife. When cutting=True the
+    knife plunges in and a slice animates away, revealing a layered
+    cross-section — and a little slice lands beside the cake."""
+    knife_class = "knife-cutting" if cutting else "knife-idle"
+    wedge_class = "wedge-overlay sliced" if cutting else "wedge-overlay"
+    landed_class = "landed-slice show" if cutting else "landed-slice"
+
+    return f"""
+    <div class="cake-wrap">
+    <svg class="cake-svg" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bottomTierGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c98fe6"/>
+          <stop offset="100%" stop-color="#a56bd1"/>
+        </linearGradient>
+        <linearGradient id="topTierGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffc2dc"/>
+          <stop offset="100%" stop-color="#ff9fc4"/>
+        </linearGradient>
+        <radialGradient id="flameGrad" cx="50%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#fff3b0"/>
+          <stop offset="55%" stop-color="#ffb703"/>
+          <stop offset="100%" stop-color="#f2699e"/>
+        </radialGradient>
+      </defs>
+
+      <!-- plate -->
+      <ellipse cx="200" cy="296" rx="150" ry="14" fill="#7c3fa8" opacity="0.12"/>
+      <ellipse cx="200" cy="288" rx="152" ry="16" fill="#f1e3fb"/>
+
+      <!-- landed slice beside the cake -->
+      <g class="{landed_class}">
+        <polygon points="300,255 335,275 300,290" fill="#c98fe6"/>
+        <polygon points="300,255 320,265 300,275" fill="#fff7f0"/>
+        <polygon points="300,275 320,265 300,290" fill="#f7c9da"/>
+      </g>
+
+      <!-- bottom tier -->
+      <rect x="90" y="190" width="220" height="90" rx="16" fill="url(#bottomTierGrad)"/>
+      <!-- cross-section stripes (only visible once the wedge slides away) -->
+      <clipPath id="wedgeClip">
+        <polygon points="200,193 165,278 235,278"/>
+      </clipPath>
+      <g clip-path="url(#wedgeClip)">
+        <rect x="150" y="193" width="100" height="21" fill="#fff7f0"/>
+        <rect x="150" y="214" width="100" height="21" fill="#f7c9da"/>
+        <rect x="150" y="235" width="100" height="21" fill="#fff7f0"/>
+        <rect x="150" y="256" width="100" height="22" fill="#f7c9da"/>
+      </g>
+      <!-- frosting overlay wedge: matches cake surface, slides away when cut -->
+      <g class="{wedge_class}">
+        <polygon points="200,193 165,278 235,278" fill="url(#bottomTierGrad)"/>
+      </g>
+      <!-- drip frosting on bottom tier -->
+      <path d="M90,190 Q100,206 112,190 Q124,208 136,190 Q148,206 160,190 Q172,208 184,190 Q196,206 208,190 Q220,208 232,190 Q244,206 256,190 Q268,208 280,190 Q292,206 310,190 L310,190 L90,190 Z"
+            fill="#fbeafc" opacity="0.92"/>
+
+      <!-- top tier -->
+      <rect x="130" y="130" width="140" height="66" rx="14" fill="url(#topTierGrad)"/>
+      <path d="M130,130 Q140,142 150,130 Q160,144 170,130 Q180,142 190,130 Q200,144 210,130 Q220,142 230,130 Q240,144 250,130 Q260,142 270,130 L270,130 L130,130 Z"
+            fill="#ffe6f0" opacity="0.95"/>
+
+      <!-- candles -->
+      <g>
+        <rect x="147" y="96" width="6" height="36" rx="2" fill="#7c3fa8"/>
+        <rect x="172" y="90" width="6" height="42" rx="2" fill="#9b5cc7"/>
+        <rect x="197" y="86" width="6" height="46" rx="2" fill="#7c3fa8"/>
+        <rect x="222" y="90" width="6" height="42" rx="2" fill="#9b5cc7"/>
+        <rect x="247" y="96" width="6" height="36" rx="2" fill="#7c3fa8"/>
+
+        <ellipse class="candle-flame" cx="150" cy="92" rx="5" ry="9" fill="url(#flameGrad)"/>
+        <ellipse class="candle-flame" cx="175" cy="86" rx="5" ry="9" fill="url(#flameGrad)"/>
+        <ellipse class="candle-flame" cx="200" cy="82" rx="5.5" ry="10" fill="url(#flameGrad)"/>
+        <ellipse class="candle-flame" cx="225" cy="86" rx="5" ry="9" fill="url(#flameGrad)"/>
+        <ellipse class="candle-flame" cx="250" cy="92" rx="5" ry="9" fill="url(#flameGrad)"/>
+      </g>
+
+      <!-- knife -->
+      <g class="knife-group {knife_class}">
+        <rect x="0" y="0" width="128" height="16" rx="5" fill="#e7e2ef" stroke="#c9c1da" stroke-width="1.5"/>
+        <rect x="-42" y="-5" width="46" height="26" rx="9" fill="#5e2b83"/>
+        <rect x="-30" y="-1" width="24" height="18" rx="6" fill="#7c3fa8"/>
+      </g>
+    </svg>
+    </div>
+    """
+
 # ---------- Pages ----------
 page = st.session_state.page
 
@@ -652,7 +852,6 @@ if page > 0:
     st.progress(page / (TOTAL - 1))
 
 if page == 0:
-    st.markdown(photo_scatter_html(), unsafe_allow_html=True)
     st.markdown("""
     <div class="hero">
         <div class="eyebrow">A tiny corner of the internet · made only for you</div>
@@ -663,6 +862,7 @@ if page == 0:
         </div>
     </div>
     """, unsafe_allow_html=True)
+    st.markdown(photo_scatter_html(), unsafe_allow_html=True)
     st.markdown('<div class="quote">"Celebrating you every day — but today is entirely yours. I just made a little of it about how much I adore you."</div>', unsafe_allow_html=True)
     st.markdown('<div class="divider-heart">💜 · 💗 · 💜</div>', unsafe_allow_html=True)
     st.caption("Fair warning: you can't skip ahead. Every page has a tiny task waiting for you. 😌")
@@ -745,18 +945,25 @@ elif page == 3:
 
 elif page == 4:
     st.markdown("## Things I hope you never forget")
-    st.caption("No task here, just a few reminders I need you to keep. Read them slowly. 💜")
+    st.caption("No task here, just a few reminders I need you to keep. 💜")
     points = [
         "We are proud of you and love celebrating you.",
-        "You don't have to have everything figured out right now. Things "
-        "will fall back to its place gradually so no tensins babu.",
+        "You don't have to have everything figured out right now — things "
+        "will fall back into place gradually, so no tension babu.",
         "I hope you keep choosing the things that make you genuinely happy.",
-        "I hope you chase the big dreams, even the ones that feel far away. You deserve everything",
-        "I hope you never forget how capable you truly are. You are the softest guy that i dreamt of",
+        "I hope you chase the big dreams, even the ones that feel far away. You deserve everything.",
+        "I hope you never forget how capable you truly are. You are the softest guy that i dreamt of.",
         "And on the days you do forget — I'll be here to remind you. 💜",
     ]
+    cards_html = '<div class="points-grid">'
     for i, text in enumerate(points, 1):
-        st.markdown(f'<div class="card"><b>{i:02}</b> &nbsp; {text}</div>', unsafe_allow_html=True)
+        cards_html += f'''
+        <div class="point-card">
+            <div class="point-num">{i:02}</div>
+            <div class="point-text">{text}</div>
+        </div>'''
+    cards_html += '</div>'
+    st.markdown(cards_html, unsafe_allow_html=True)
     nav()
 
 elif page == 5:
@@ -783,11 +990,16 @@ elif page == 5:
 elif page == 6:
     st.markdown("## One last thing before the letter...")
     st.markdown('<div class="hero"><div class="subtitle">You have one important birthday duty left to perform.</div><h1>Cut the Cake</h1></div>', unsafe_allow_html=True)
-    st.caption("Fun fact: virtual cake has zero calories. Cut freely. 🍰")
-    cake = st.button("🔪 Cut the cake 🎂")
-    if cake:
-        st.session_state.answers["cake"] = True
-    if st.session_state.answers.get("cake"):
+
+    cut = st.session_state.answers.get("cake", False)
+    st.markdown(cake_svg(cutting=cut), unsafe_allow_html=True)
+
+    if not cut:
+        st.caption("Fun fact: virtual cake has zero calories. Cut freely. 🍰")
+        if st.button("🔪 Cut the cake 🎂"):
+            st.session_state.answers["cake"] = True
+            st.rerun()
+    else:
         st.balloons()
         st.markdown("""
         <div class="final">
@@ -797,7 +1009,7 @@ elif page == 6:
         </div>
         """, unsafe_allow_html=True)
 
-    unlocked = st.session_state.answers.get("cake", False)
+    unlocked = cut
     nav(unlocked, "You must cut the cake first — no shortcuts 🎂")
 
 elif page == 7:
