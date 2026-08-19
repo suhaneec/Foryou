@@ -774,11 +774,11 @@ elif page == 8:
             </div>
             <div class="flip-card-face flip-card-back">
                 <div class="eyebrow">The final page</div>
-                <h1>HAPPY<br>BIRTHDAY</h1>
+                <h1>HAPPY<br>BIWRTHDAY AGAIN JI</h1>
                 <p>
-                    To my favourite person —<br>
-                    may this year be kinder, brighter, and fuller<br>
-                    than every year that came before it.
+                    Saksham —<br>
+                    I love celebrating you <br>
+                    Biggest biwrthday hugs and kisses to you.
                 </p>
                 <div class="quote">"And yes... I would choose you again."</div>
                 <div style="font-size:2rem;">💜 💗 🎂 💗 💜</div>
