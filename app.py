@@ -1,7 +1,9 @@
 import time
 import base64
-import streamlit as st
 from pathlib import Path
+
+import streamlit as st
+
 
 # ============================================================
 # PAGE CONFIG
@@ -18,7 +20,7 @@ ASSETS = Path(__file__).parent / "assets"
 
 
 # ============================================================
-# YOUR LETTER — GRAMMAR KEPT EXACTLY AS YOU WROTE IT
+# YOUR LETTER — UNCHANGED
 # ============================================================
 
 FINAL_LETTER = """
@@ -47,6 +49,84 @@ Happiest birthday, baby.
 
 
 # ============================================================
+# SESSION STATE
+# ============================================================
+
+if "page" not in st.session_state:
+    st.session_state.page = 0
+
+if "answers" not in st.session_state:
+    st.session_state.answers = {}
+
+TOTAL = 9
+
+
+def next_page():
+    st.session_state.page = min(
+        st.session_state.page + 1,
+        TOTAL - 1
+    )
+
+
+def prev_page():
+    st.session_state.page = max(
+        st.session_state.page - 1,
+        0
+    )
+
+
+# ============================================================
+# ASSET HELPERS
+# ============================================================
+
+def find_image(name):
+    """
+    Finds image regardless of .jpg/.jpeg/.png capitalization.
+    """
+    possible = [
+        name,
+        f"{name}.jpg",
+        f"{name}.jpeg",
+        f"{name}.png",
+        f"{name}.JPG",
+        f"{name}.JPEG",
+        f"{name}.PNG",
+    ]
+
+    for item in possible:
+        path = ASSETS / item
+        if path.exists():
+            return path
+
+    return None
+
+
+def image_base64(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+
+def show_image(name, height=None):
+    path = find_image(name)
+
+    if not path:
+        st.markdown(
+            f"""
+            <div class="missing-photo">
+                💜 Photo "{name}" not found 💜
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        return
+
+    if height:
+        st.image(str(path), width="stretch")
+    else:
+        st.image(str(path), width="stretch")
+
+
+# ============================================================
 # CSS
 # ============================================================
 
@@ -54,58 +134,62 @@ st.markdown(
     """
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
-
-
-/* ==========================================================
-   GLOBAL
-   ========================================================== */
+@import url(
+'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Dancing+Script:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap'
+);
 
 :root {
-    --purple: #7c3fa8;
-    --purple-dark: #5e2b83;
-    --purple-light: #c9a6e6;
-    --pink: #f2699e;
-    --pink-light: #ffd1e3;
-    --lavender: #f3e5fa;
-    --cream: #fffaf5;
-    --ink: #4a2a63;
-    --soft: #76558d;
+    --purple-dark: #5b2c6f;
+    --purple: #8e55b8;
+    --purple-light: #c99be8;
+    --pink: #f47da8;
+    --pink-light: #ffd5e4;
+    --cream: #fffafc;
+    --ink: #4b3157;
 }
 
 html,
 body,
-[class*="css"] {
+[data-testid="stAppViewContainer"] {
     font-family: 'Poppins', sans-serif;
 }
 
 .stApp {
-    min-height: 100vh;
-
     background:
-        radial-gradient(circle at 5% 10%, rgba(255, 184, 210, .40), transparent 25%),
-        radial-gradient(circle at 95% 15%, rgba(198, 161, 231, .38), transparent 27%),
-        radial-gradient(circle at 10% 90%, rgba(228, 202, 244, .55), transparent 30%),
-        radial-gradient(circle at 90% 90%, rgba(255, 210, 227, .40), transparent 30%),
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(255, 183, 211, .42),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 90% 10%,
+            rgba(205, 160, 235, .38),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 15% 85%,
+            rgba(235, 204, 250, .55),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 90% 85%,
+            rgba(255, 215, 230, .45),
+            transparent 30%
+        ),
         linear-gradient(
             135deg,
-            #fff8fc 0%,
-            #f7edfc 35%,
-            #f3e6fa 65%,
-            #fff3f8 100%
+            #fff8fd,
+            #f7eafb,
+            #fff5f8
         );
+
+    min-height: 100vh;
 }
 
 .block-container {
-    max-width: 1000px;
+    max-width: 920px;
     padding-top: 1.2rem;
     padding-bottom: 5rem;
-    position: relative;
-    z-index: 5;
-}
-
-div[data-testid="stVerticalBlock"] {
-    gap: .55rem;
 }
 
 h1,
@@ -116,132 +200,77 @@ h3 {
 }
 
 p,
-div,
 span,
 label,
-li {
+div {
     color: var(--ink);
 }
 
 
-/* ==========================================================
+/* ============================================================
    FLOATING HEARTS
-   ========================================================== */
+   ============================================================ */
 
-.hearts-bg {
+.heart-layer {
     position: fixed;
     inset: 0;
-    overflow: hidden;
     pointer-events: none;
+    overflow: hidden;
     z-index: 0;
 }
 
 .float-heart {
     position: absolute;
     bottom: -50px;
-    animation: floatHeart linear infinite;
-    opacity: .55;
+    animation-name: floatHeart;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    opacity: .7;
 }
 
 @keyframes floatHeart {
 
     0% {
-        transform: translateY(0) rotate(0deg);
+        transform:
+            translateY(0)
+            rotate(0deg);
         opacity: 0;
     }
 
     10% {
-        opacity: .55;
+        opacity: .75;
     }
 
     50% {
-        transform: translateY(-50vh) translateX(25px) rotate(15deg);
+        transform:
+            translateY(-50vh)
+            translateX(25px)
+            rotate(15deg);
     }
 
     90% {
-        opacity: .30;
+        opacity: .35;
     }
 
     100% {
-        transform: translateY(-110vh) translateX(-20px) rotate(-15deg);
+        transform:
+            translateY(-110vh)
+            translateX(-20px)
+            rotate(-15deg);
         opacity: 0;
     }
 }
 
 
-/* ==========================================================
-   PROGRESS
-   ========================================================== */
-
-.progress-text {
-    text-align: center;
-    color: var(--soft);
-    font-size: .72rem;
-    letter-spacing: 2px;
-    margin-bottom: .5rem;
-    font-weight: 600;
-}
-
-div[data-testid="stProgress"] > div > div {
-    background: linear-gradient(
-        90deg,
-        var(--pink),
-        var(--purple)
-    ) !important;
-}
-
-div[data-testid="stProgress"] > div {
-    background-color: #e7d5f1 !important;
-}
-
-
-/* ==========================================================
-   BUTTONS
-   ========================================================== */
-
-div.stButton > button {
-    width: 100%;
-    min-height: 3rem;
-
-    border: none !important;
-    border-radius: 999px;
-
-    background: linear-gradient(
-        90deg,
-        var(--pink),
-        var(--purple)
-    ) !important;
-
-    color: white !important;
-
-    font-weight: 600;
-
-    box-shadow:
-        0 10px 25px rgba(124, 63, 168, .25);
-
-    transition: .2s ease;
-}
-
-div.stButton > button p {
-    color: white !important;
-}
-
-div.stButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow:
-        0 14px 32px rgba(124, 63, 168, .35);
-}
-
-
-/* ==========================================================
+/* ============================================================
    FIRST PAGE — SCRAPBOOK
-   ========================================================== */
+   ============================================================ */
 
 .scrapbook {
     position: relative;
-    min-height: 760px;
-    margin-top: .5rem;
-    padding: 25px 10px 60px;
+    min-height: 720px;
+    padding: 20px 10px 40px;
+    overflow: hidden;
 }
 
 
@@ -249,187 +278,184 @@ div.stButton > button:hover {
 
 .string {
     position: absolute;
+    top: -20px;
     width: 2px;
-    background: rgba(94, 43, 131, .25);
-    transform-origin: top;
+    height: 145px;
+    background: rgba(91,44,111,.35);
+    transform-origin: top center;
+    z-index: 1;
 }
 
 .string.one {
-    height: 100px;
-    left: 15%;
-    top: 0;
-    transform: rotate(-4deg);
+    left: 8%;
+    transform: rotate(-7deg);
 }
 
 .string.two {
-    height: 130px;
-    right: 16%;
-    top: 0;
+    left: 28%;
+    height: 110px;
     transform: rotate(5deg);
 }
 
 .string.three {
-    height: 95px;
-    left: 72%;
-    top: 180px;
-    transform: rotate(-3deg);
+    right: 28%;
+    height: 125px;
+    transform: rotate(-4deg);
 }
 
 .string.four {
-    height: 80px;
-    left: 24%;
-    top: 420px;
-    transform: rotate(4deg);
+    right: 8%;
+    height: 150px;
+    transform: rotate(7deg);
 }
 
 
-/* little clips */
-
-.clip {
-    position: absolute;
-    width: 30px;
-    height: 10px;
-    border-radius: 5px;
-    background: #d5a7dc;
-    box-shadow: 0 2px 5px rgba(0,0,0,.12);
-    z-index: 4;
-}
-
-
-/* photo */
-
-.polaroid {
-    position: absolute;
-    background: white;
-    padding: 10px 10px 32px;
-    box-shadow:
-        0 15px 30px rgba(75, 38, 96, .20);
-    border-radius: 3px;
-    width: 215px;
-}
-
-.polaroid img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    display: block;
-}
-
-.polaroid .caption {
-    position: absolute;
-    bottom: 7px;
-    left: 0;
-    right: 0;
-
-    text-align: center;
-
-    font-family: 'Dancing Script', cursive;
-    font-size: 17px;
-    color: var(--purple-dark);
-}
-
-
-/* different photo positions */
-
-.photo-a {
-    left: 2%;
-    top: 35px;
-    transform: rotate(-8deg);
-}
-
-.photo-b {
-    right: 2%;
-    top: 70px;
-    transform: rotate(8deg);
-}
-
-.photo-c {
-    left: 8%;
-    top: 405px;
-    transform: rotate(6deg);
-}
-
-.photo-d {
-    right: 7%;
-    top: 440px;
-    transform: rotate(-6deg);
-}
-
-
-/* tape */
-
-.tape {
-    position: absolute;
-    width: 72px;
-    height: 22px;
-    background: rgba(255, 211, 226, .75);
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-3deg);
-}
-
-
-/* center text */
+/* centre text */
 
 .scrap-center {
-    position: absolute;
-    left: 50%;
-    top: 195px;
+    position: relative;
+    z-index: 5;
 
-    transform: translateX(-50%);
+    width: min(90%, 600px);
+    margin: 145px auto 80px;
 
-    width: 46%;
-    min-width: 300px;
+    padding: 35px 30px;
+
+    background:
+        rgba(255,255,255,.76);
+
+    border:
+        1px solid rgba(255,255,255,.9);
+
+    border-radius: 30px;
+
+    box-shadow:
+        0 25px 70px rgba(91,44,111,.15);
 
     text-align: center;
 
-    z-index: 10;
+    transform: rotate(-1deg);
 }
 
 .scrap-eyebrow {
-    font-size: .7rem;
+    font-size: .72rem;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--pink);
+    color: var(--pink) !important;
     font-weight: 600;
 }
 
 .scrap-center h1 {
     font-family: 'Dancing Script', cursive !important;
+    font-size: clamp(3rem, 9vw, 5.5rem);
+    line-height: 1.05;
+    margin: 15px 0 20px;
 
-    font-size: clamp(3rem, 7vw, 5.2rem);
-
-    line-height: .95;
-
-    margin: 12px 0;
-
-    background: linear-gradient(
-        100deg,
-        var(--purple),
-        var(--pink),
-        var(--purple)
-    );
+    background:
+        linear-gradient(
+            90deg,
+            #6c3a8b,
+            #f06f9e,
+            #8e55b8
+        );
 
     -webkit-background-clip: text;
     background-clip: text;
-
     -webkit-text-fill-color: transparent;
 }
 
 .scrap-subtitle {
-    background: rgba(255,255,255,.72);
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #70567c !important;
+}
 
-    border: 1px solid rgba(185,142,224,.30);
 
-    border-radius: 25px;
+/* ============================================================
+   POLAROIDS
+   ============================================================ */
 
-    padding: 18px 20px;
+.polaroid {
+    position: absolute;
+
+    background: white;
+
+    padding: 10px 10px 30px;
+
+    width: 185px;
 
     box-shadow:
-        0 12px 30px rgba(124,63,168,.10);
+        0 15px 35px rgba(91,44,111,.23);
 
-    font-size: .95rem;
-    line-height: 1.8;
+    border-radius: 3px;
+
+    z-index: 4;
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+}
+
+.polaroid:hover {
+    transform:
+        rotate(0deg)
+        scale(1.06) !important;
+
+    box-shadow:
+        0 25px 50px rgba(91,44,111,.3);
+
+    z-index: 10;
+}
+
+.polaroid img {
+    width: 100%;
+    height: 155px;
+    object-fit: cover;
+}
+
+.polaroid-caption {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-top: 7px;
+    color: var(--purple-dark) !important;
+}
+
+.photo-a {
+    top: 15px;
+    left: 3%;
+    transform: rotate(-8deg);
+}
+
+.photo-b {
+    top: 25px;
+    right: 4%;
+    transform: rotate(8deg);
+}
+
+.photo-c {
+    bottom: 35px;
+    left: 5%;
+    transform: rotate(7deg);
+}
+
+.photo-d {
+    bottom: 25px;
+    right: 4%;
+    transform: rotate(-7deg);
+}
+
+
+/* little tape */
+
+.tape {
+    position: absolute;
+    width: 65px;
+    height: 20px;
+    background: rgba(255,224,150,.65);
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
 }
 
 
@@ -437,360 +463,222 @@ div.stButton > button:hover {
 
 .note {
     position: absolute;
+    z-index: 3;
 
-    background: #fff6a8;
+    background: #fff6b8;
 
-    padding: 13px 17px;
-
-    width: 165px;
+    padding: 15px 18px;
 
     font-family: 'Dancing Script', cursive;
-
-    font-size: 18px;
-
-    color: #704c2b;
+    font-size: 1.15rem;
 
     box-shadow:
-        0 8px 18px rgba(80,60,20,.15);
+        0 10px 25px rgba(91,44,111,.14);
 }
 
-.note-a {
-    top: 300px;
-    left: 1%;
-    transform: rotate(-8deg);
+.note-one {
+    left: 14%;
+    top: 230px;
+    transform: rotate(-6deg);
 }
 
-.note-b {
-    top: 345px;
-    right: 0%;
+.note-two {
+    right: 12%;
+    top: 245px;
     transform: rotate(7deg);
-    background: #ead8ff;
-    color: var(--purple-dark);
 }
 
-.note-c {
+.note-three {
+    left: 38%;
     bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-2deg);
-    background: #ffddea;
-    color: #874362;
+    transform: rotate(-3deg);
 }
 
 
-/* mobile */
-
-@media(max-width: 700px) {
-
-    .scrapbook {
-        min-height: auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-bottom: 20px;
-    }
-
-    .string,
-    .clip,
-    .note {
-        display: none;
-    }
-
-    .scrap-center {
-        position: relative;
-        left: auto;
-        top: auto;
-        transform: none;
-
-        width: 100%;
-        min-width: auto;
-
-        order: 1;
-
-        margin-bottom: 25px;
-    }
-
-    .polaroid {
-        position: relative;
-
-        left: auto;
-        right: auto;
-        top: auto;
-
-        width: 75%;
-
-        margin: -5px auto 25px;
-    }
-
-    .photo-a {
-        order: 2;
-        transform: rotate(-5deg);
-    }
-
-    .photo-b {
-        order: 3;
-        transform: rotate(5deg);
-    }
-
-    .photo-c {
-        order: 4;
-        transform: rotate(4deg);
-    }
-
-    .photo-d {
-        order: 5;
-        transform: rotate(-5deg);
-    }
-
-    .polaroid img {
-        height: 270px;
-    }
-}
-
-
-/* ==========================================================
-   CARDS
-   ========================================================== */
+/* ============================================================
+   GENERAL CARDS
+   ============================================================ */
 
 .card {
-    background: rgba(255,255,255,.75);
+    background: rgba(255,255,255,.78);
 
-    backdrop-filter: blur(8px);
+    border:
+        1px solid rgba(201,155,232,.35);
 
-    border: 1px solid rgba(185,142,224,.35);
-
-    border-radius: 24px;
+    border-radius: 25px;
 
     padding: 1.5rem;
 
     margin: 1rem 0;
 
     box-shadow:
-        0 14px 40px rgba(124,63,168,.12);
-}
-
-.small {
-    color: var(--soft);
-    font-size: .92rem;
-    line-height: 1.75;
+        0 15px 40px rgba(91,44,111,.12);
 }
 
 .quote {
     font-family: 'Dancing Script', cursive;
-
-    font-weight: 700;
-
     font-size: 2rem;
-
     line-height: 1.4;
-
-    color: var(--purple-dark);
-
+    color: var(--purple-dark) !important;
     text-align: center;
+}
 
-    padding: 1rem;
+.small {
+    color: #70567c !important;
+    font-size: .92rem;
+    line-height: 1.8;
 }
 
 
-/* ==========================================================
+/* ============================================================
    MEMORY PHOTOS
-   ========================================================== */
+   ============================================================ */
 
-.photo-frame {
+.memory-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+
+    align-items: center;
+
+    margin: 35px 0;
+}
+
+.memory-photo {
     background: white;
-
-    border-radius: 24px;
-
-    padding: 10px;
+    padding: 12px;
 
     box-shadow:
-        0 18px 40px rgba(124,63,168,.18);
-}
+        0 18px 45px rgba(91,44,111,.18);
 
-[data-testid="stImage"] img {
     border-radius: 18px;
 }
 
-.memory-row {
-    margin: 2rem 0;
-}
-
-.mem-card {
+.memory-text {
     background: rgba(255,255,255,.75);
-
+    padding: 25px;
     border-radius: 22px;
 
-    padding: 1.4rem;
-
     box-shadow:
-        0 14px 35px rgba(124,63,168,.10);
+        0 12px 35px rgba(91,44,111,.1);
 }
 
-.mem-tag {
-    color: var(--pink);
-
-    font-size: .68rem;
-
-    letter-spacing: 2px;
-
+.memory-tag {
     text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: .68rem;
+    color: var(--pink) !important;
+    font-weight: 600;
 }
 
-.mem-card h3 {
-    margin: .3rem 0 .5rem;
-
-    font-size: 1.5rem;
+.memory-text h3 {
+    margin: 5px 0 10px;
 }
 
-.mem-card p {
-    color: var(--soft);
-
+.memory-text p {
+    color: #70567c !important;
     line-height: 1.7;
 }
 
 
-/* ==========================================================
-   POINT CARDS
-   ========================================================== */
+/* ============================================================
+   POINTS
+   ============================================================ */
 
-.points-grid {
+.points {
     display: grid;
-
     grid-template-columns:
-        repeat(auto-fit, minmax(260px, 1fr));
+        repeat(auto-fit,minmax(250px,1fr));
 
     gap: 12px;
 }
 
-.point-card {
-    background: rgba(255,255,255,.75);
+.point {
+    background: rgba(255,255,255,.78);
 
-    border: 1px solid rgba(185,142,224,.3);
+    border-radius: 20px;
 
-    border-radius: 18px;
-
-    padding: 17px;
+    padding: 18px;
 
     display: flex;
-
     gap: 12px;
 
     box-shadow:
-        0 10px 25px rgba(124,63,168,.08);
+        0 10px 25px rgba(91,44,111,.09);
 }
 
-.point-num {
+.point-number {
     font-family: 'Cormorant Garamond', serif;
-
-    font-size: 1.5rem;
-
-    color: var(--pink);
-
+    font-size: 1.6rem;
     font-weight: 700;
-}
-
-.point-text {
-    font-size: 1rem;
-
-    line-height: 1.5;
-
-    font-weight: 500;
+    color: var(--pink) !important;
 }
 
 
-/* ==========================================================
+/* ============================================================
    LETTER
-   ========================================================== */
+   ============================================================ */
 
-.letter-card {
+.letter {
     background:
         linear-gradient(
             180deg,
             rgba(255,255,255,.96),
-            rgba(250,240,255,.9)
+            rgba(250,240,255,.92)
         );
-
-    border: 1px solid rgba(185,142,224,.4);
 
     border-radius: 28px;
 
-    padding: 2rem 1.8rem;
+    padding: 35px 28px;
 
     box-shadow:
-        0 20px 55px rgba(124,63,168,.16);
+        0 20px 60px rgba(91,44,111,.16);
 
-    position: relative;
-}
-
-.letter-card::before {
-    content: "💌";
-
-    position: absolute;
-
-    top: -20px;
-
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    font-size: 2rem;
-
-    background: #fff8ff;
-
-    padding: 5px 12px;
-
-    border-radius: 50%;
+    border:
+        1px solid rgba(201,155,232,.4);
 }
 
 .letter-text {
+    white-space: pre-line;
+
     font-family: 'Cormorant Garamond', serif;
+
+    font-size: 1.35rem;
+
+    line-height: 1.9;
 
     font-style: italic;
 
-    font-size: 1.28rem;
-
-    line-height: 2;
-
-    white-space: pre-line;
-
-    color: var(--ink);
-
-    padding-top: 15px;
+    color: var(--ink) !important;
 }
 
-.letter-signoff {
+.signoff {
     text-align: right;
 
     font-family: 'Dancing Script', cursive;
 
-    font-size: 1.6rem;
+    font-size: 1.7rem;
 
-    color: var(--purple);
+    color: var(--purple) !important;
 }
 
 
-/* ==========================================================
-   CAKE — SIMPLE HTML/CSS, NO SVG
-   ========================================================== */
-
-.cake-area {
-    position: relative;
-
-    width: 350px;
-    height: 360px;
-
-    margin: 20px auto;
-}
+/* ============================================================
+   CAKE
+   ============================================================ */
 
 .cake {
-    position: absolute;
+    text-align: center;
+    margin: 35px auto;
+}
 
-    left: 50%;
-    bottom: 25px;
+.cake-body {
+    position: relative;
 
-    transform: translateX(-50%);
-
-    width: 270px;
+    width: 280px;
     height: 180px;
+
+    margin: auto;
 }
 
 .cake-bottom {
@@ -799,471 +687,274 @@ div.stButton > button:hover {
     bottom: 0;
     left: 0;
 
-    width: 270px;
-    height: 105px;
+    width: 280px;
+    height: 100px;
 
-    background: linear-gradient(
-        #c58ce1,
-        #9558bd
-    );
+    border-radius:
+        20px 20px 25px 25px;
 
-    border-radius: 15px 15px 25px 25px;
+    background:
+        linear-gradient(
+            #c58be0,
+            #8e55b8
+        );
 
     box-shadow:
-        inset 0 -12px 0 rgba(80,30,100,.10),
-        0 12px 20px rgba(90,50,110,.20);
+        0 15px 30px rgba(91,44,111,.2);
 }
 
-.cake-middle {
+.cake-top {
     position: absolute;
 
-    bottom: 75px;
+    bottom: 80px;
     left: 35px;
 
-    width: 200px;
+    width: 210px;
     height: 70px;
 
-    background: linear-gradient(
-        #ffbfd9,
-        #ff8fb9
-    );
+    border-radius:
+        18px 18px 12px 12px;
 
-    border-radius: 15px;
-
-    box-shadow:
-        0 8px 12px rgba(100,50,100,.12);
-}
-
-.cream {
-    position: absolute;
-
-    bottom: 70px;
-
-    left: 35px;
-
-    width: 200px;
-
-    height: 25px;
-
-    background: #fff5fa;
-
-    border-radius: 50%;
-}
-
-.cake-cream-bottom {
-    position: absolute;
-
-    bottom: 92px;
-
-    left: 0;
-
-    width: 270px;
-
-    height: 30px;
-
-    background: #fff4fa;
-
-    border-radius: 50%;
+    background:
+        linear-gradient(
+            #ffd1e3,
+            #ff9fc4
+        );
 }
 
 .candle {
     position: absolute;
 
-    bottom: 140px;
+    bottom: 145px;
 
-    width: 9px;
-    height: 45px;
+    width: 7px;
+    height: 35px;
 
-    background: #8c55b4;
+    background: var(--purple);
 
-    border-radius: 4px;
+    border-radius: 5px;
 }
 
-.candle.c1 { left: 80px; }
-.candle.c2 { left: 130px; }
-.candle.c3 { left: 180px; }
+.candle.one {
+    left: 90px;
+}
+
+.candle.two {
+    left: 135px;
+}
+
+.candle.three {
+    left: 180px;
+}
 
 .flame {
     position: absolute;
 
-    width: 14px;
-    height: 22px;
+    bottom: 177px;
 
-    background: radial-gradient(
-        circle at 50% 70%,
-        #fff6a0,
-        #ff9f43 60%,
-        #f2699e
-    );
+    font-size: 25px;
 
-    border-radius: 60% 40% 60% 40%;
-
-    top: -21px;
-    left: -2px;
-
-    animation: flame 1s infinite alternate;
+    animation:
+        flicker .8s infinite alternate;
 }
 
-@keyframes flame {
+.flame.one {
+    left: 82px;
+}
 
+.flame.two {
+    left: 127px;
+}
+
+.flame.three {
+    left: 172px;
+}
+
+@keyframes flicker {
     from {
-        transform: scale(.9) rotate(-3deg);
+        transform: scale(.85) rotate(-3deg);
     }
 
     to {
-        transform: scale(1.12) rotate(3deg);
+        transform: scale(1.1) rotate(3deg);
     }
 }
 
-
-/* knife */
-
-.knife {
-    position: absolute;
-
-    top: 45px;
-    left: 230px;
-
-    width: 130px;
-    height: 18px;
-
-    transform: rotate(-35deg);
-
-    transition:
-        transform 1s cubic-bezier(.4,0,.2,1);
-
-    z-index: 5;
-}
-
-.knife-handle {
-    position: absolute;
-
-    right: 0;
-
-    width: 45px;
-    height: 24px;
-
-    border-radius: 8px;
-
-    background: var(--purple-dark);
-}
-
-.knife-blade {
-    position: absolute;
-
-    left: 0;
-
-    top: 3px;
-
-    width: 95px;
-    height: 12px;
-
-    background: linear-gradient(
-        #ffffff,
-        #dcd8e2
-    );
-
-    border-radius: 4px 0 0 4px;
-
-    border: 1px solid #c9c3d2;
-}
-
-.cutting .knife {
-    animation: cutCake 1.4s forwards;
-}
-
-@keyframes cutCake {
-
-    0% {
-        transform:
-            translate(50px,-60px)
-            rotate(-45deg);
-    }
-
-    35% {
-        transform:
-            translate(10px,35px)
-            rotate(-45deg);
-    }
-
-    60% {
-        transform:
-            translate(-20px,115px)
-            rotate(-45deg);
-    }
-
-    100% {
-        transform:
-            translate(-15px,105px)
-            rotate(-35deg);
-    }
-}
-
-
-/* slice */
-
-.slice {
-    position: absolute;
-
-    bottom: 25px;
-    right: 5px;
-
-    width: 65px;
-    height: 70px;
-
-    opacity: 0;
-
-    transform: translate(0,0) rotate(0deg);
-
-    z-index: 10;
-}
-
-.slice .slice-purple {
-    position: absolute;
-
-    bottom: 0;
-
-    width: 65px;
-    height: 55px;
-
-    background: #a96bd0;
-
-    clip-path: polygon(
-        0 0,
-        100% 35%,
-        100% 100%,
-        25% 100%
-    );
-}
-
-.slice .slice-cream {
-    position: absolute;
-
-    top: 8px;
-
-    left: 4px;
-
-    width: 58px;
-    height: 13px;
-
-    background: #fff5fa;
-
-    transform: rotate(15deg);
-
-    border-radius: 50%;
-}
-
-.cutting .slice {
-    animation: sliceMove 1s 1s forwards;
-}
-
-@keyframes sliceMove {
-
-    from {
-        opacity: 0;
-        transform:
-            translate(0,0)
-            rotate(0);
-    }
-
-    to {
-        opacity: 1;
-        transform:
-            translate(65px,20px)
-            rotate(18deg);
-    }
-}
-
-.cake-message {
+.cut-message {
     text-align: center;
 
-    font-family: 'Dancing Script', cursive;
+    padding: 25px;
 
-    font-size: 2rem;
-
-    color: var(--purple-dark);
-
-    animation: appear .8s ease;
-}
-
-@keyframes appear {
-
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-
-/* ==========================================================
-   FINAL FLIP CARD
-   ========================================================== */
-
-.flip-card {
-    perspective: 1000px;
-
-    width: 100%;
-
-    max-width: 420px;
-
-    margin: 30px auto;
-}
-
-.flip-input {
-    display: none;
-}
-
-.flip-inner {
-    position: relative;
-
-    width: 100%;
-
-    padding-top: 125%;
-
-    transition:
-        transform .8s;
-
-    transform-style: preserve-3d;
-
-    cursor: pointer;
-}
-
-.flip-input:checked + .flip-inner {
-    transform: rotateY(180deg);
-}
-
-.flip-face {
-    position: absolute;
-
-    inset: 0;
+    background: rgba(255,255,255,.8);
 
     border-radius: 25px;
 
-    overflow: hidden;
-
-    backface-visibility: hidden;
-
     box-shadow:
-        0 18px 45px rgba(124,63,168,.2);
+        0 15px 40px rgba(91,44,111,.12);
 }
 
-.flip-front {
-    background: white;
-}
 
-.flip-front img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+/* ============================================================
+   FINAL
+   ============================================================ */
 
-.flip-hint {
-    position: absolute;
-
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    padding: 14px;
-
+.final-page {
     text-align: center;
+    padding: 40px 10px;
+}
 
-    background: rgba(94,43,131,.65);
+.final-page h1 {
+    font-family: 'Dancing Script', cursive !important;
+    font-size: clamp(3rem,10vw,6rem);
+}
+
+.final-hearts {
+    font-size: 3rem;
+    margin: 20px;
+}
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.stButton > button {
+    width: 100%;
+
+    border: none;
+
+    border-radius: 999px;
+
+    min-height: 3rem;
+
+    background:
+        linear-gradient(
+            90deg,
+            #f2699e,
+            #8e55b8
+        );
 
     color: white !important;
 
     font-weight: 600;
+
+    box-shadow:
+        0 10px 25px rgba(142,85,184,.25);
 }
 
-.flip-back {
-    transform: rotateY(180deg);
-
-    background:
-        linear-gradient(
-            160deg,
-            #fff,
-            #f5e7fc
-        );
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-
-    align-items: center;
-
-    text-align: center;
-
-    padding: 30px;
-}
-
-.flip-back h1 {
-    font-family: 'Dancing Script', cursive !important;
-
-    font-size: 3rem;
-
-    line-height: 1;
-
-    color: var(--purple) !important;
-}
-
-.flip-back p {
-    line-height: 1.8;
-
-    color: var(--soft);
+.stButton > button p {
+    color: white !important;
 }
 
 
-/* ==========================================================
-   INPUT / CHECKBOX
-   ========================================================== */
+/* ============================================================
+   INPUTS
+   ============================================================ */
 
-div[data-testid="stTextInput"] input {
-
-    border-radius: 14px !important;
-
-    border:
-        1px solid var(--purple-light) !important;
-
-    background:
-        rgba(255,255,255,.9) !important;
-
-    color: var(--ink) !important;
-}
-
-div[data-testid="stCheckbox"] label p {
-    color: var(--ink) !important;
+input {
+    border-radius: 15px !important;
 }
 
 
-/* ==========================================================
+/* ============================================================
    FOOTER
-   ========================================================== */
+   ============================================================ */
 
 .footer {
     text-align: center;
 
-    color: var(--purple);
+    padding: 40px 0 10px;
+
+    color: var(--purple) !important;
 
     font-size: .75rem;
+}
 
-    padding-top: 35px;
 
-    letter-spacing: .5px;
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media(max-width:700px) {
+
+    .scrapbook {
+        min-height: 900px;
+    }
+
+    .polaroid {
+        width: 125px;
+        padding: 7px 7px 20px;
+    }
+
+    .polaroid img {
+        height: 105px;
+    }
+
+    .photo-a {
+        left: 1%;
+    }
+
+    .photo-b {
+        right: 1%;
+    }
+
+    .photo-c {
+        left: 2%;
+        bottom: 80px;
+    }
+
+    .photo-d {
+        right: 2%;
+        bottom: 70px;
+    }
+
+    .note {
+        font-size: .9rem;
+        padding: 10px;
+    }
+
+    .note-one {
+        left: 5%;
+        top: 200px;
+    }
+
+    .note-two {
+        right: 5%;
+        top: 205px;
+    }
+
+    .note-three {
+        left: 35%;
+        bottom: 25px;
+    }
+
+    .scrap-center {
+        margin-top: 190px;
+        margin-bottom: 130px;
+        padding: 30px 18px;
+    }
+
+    .memory-card {
+        grid-template-columns: 1fr;
+    }
+
 }
 
 </style>
+""",
+    unsafe_allow_html=True,
+)
 
 
-<!-- FLOATING HEARTS -->
+# ============================================================
+# FLOATING HEART HTML
+# IMPORTANT:
+# THIS IS INSIDE st.markdown SO IT WILL NOT SHOW AS TEXT
+# ============================================================
 
-<div class="hearts-bg">
+st.markdown(
+    """
+<div class="heart-layer">
 
     <span class="float-heart"
           style="left:5%;font-size:20px;animation-duration:14s;animation-delay:0s;">
@@ -1307,49 +998,31 @@ div[data-testid="stCheckbox"] label p {
 
 
 # ============================================================
-# SESSION STATE
+# NAVIGATION
 # ============================================================
 
-if "page" not in st.session_state:
-    st.session_state.page = 0
-
-if "answers" not in st.session_state:
-    st.session_state.answers = {}
-
-
-TOTAL = 9
-
-
-def next_page():
-    st.session_state.page = min(
-        st.session_state.page + 1,
-        TOTAL - 1
-    )
-
-
-def prev_page():
-    st.session_state.page = max(
-        st.session_state.page - 1,
-        0
-    )
-
-
-def nav(
-    unlocked=True,
-    lock_msg="Finish the task above to unlock this 💭"
-):
+def nav(unlocked=True, message="Finish the task above to unlock this 💭"):
 
     st.write("")
 
-    if st.session_state.page > 0:
+    if st.session_state.page == 0:
+
+        st.button(
+            "Open your birthday surprise →",
+            on_click=next_page,
+            key="start_button",
+        )
+
+    else:
 
         c1, c2 = st.columns(2)
 
         with c1:
+
             st.button(
                 "← Back",
                 on_click=prev_page,
-                key=f"back_{st.session_state.page}"
+                key=f"back_{st.session_state.page}",
             )
 
         with c2:
@@ -1361,7 +1034,7 @@ def nav(
                     st.button(
                         "Continue →",
                         on_click=next_page,
-                        key=f"next_{st.session_state.page}"
+                        key=f"next_{st.session_state.page}",
                     )
 
                 else:
@@ -1369,7 +1042,7 @@ def nav(
                     st.button(
                         "🔒 Continue →",
                         disabled=True,
-                        key=f"locked_{st.session_state.page}"
+                        key=f"locked_{st.session_state.page}",
                     )
 
         if not unlocked:
@@ -1379,294 +1052,159 @@ def nav(
                 <div style="
                     text-align:center;
                     color:#f2699e;
-                    font-size:.82rem;
+                    font-size:.8rem;
                     margin-top:8px;
                 ">
-                    {lock_msg}
+                    {message}
                 </div>
                 """,
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
 
-    else:
-
-        st.button(
-            "Open your birthday surprise →",
-            on_click=next_page,
-            key="start"
-        )
-
 
 # ============================================================
-# IMAGE HELPERS
-# ============================================================
-
-def find_image(names):
-
-    extensions = [
-        ".jpeg",
-        ".jpg",
-        ".png",
-        ".JPG",
-        ".JPEG",
-        ".PNG"
-    ]
-
-    for name in names:
-
-        path = ASSETS / name
-
-        if path.exists():
-            return path
-
-        for ext in extensions:
-
-            candidate = ASSETS / f"{name}{ext}"
-
-            if candidate.exists():
-                return candidate
-
-    return None
-
-
-def img_to_base64(path):
-
-    with open(path, "rb") as f:
-
-        return base64.b64encode(
-            f.read()
-        ).decode()
-
-
-def photo(name):
-
-    path = find_image([name])
-
-    if path:
-
-        st.image(
-            str(path),
-            use_container_width=True
-        )
-
-    else:
-
-        st.markdown(
-            f"""
-            <div style="
-                background:#fff;
-                padding:40px;
-                border-radius:20px;
-                text-align:center;
-                color:#9b5cc7;
-            ">
-                💜 Photo "{name}" not found
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-# ============================================================
-# MEMORY ROW
-# ============================================================
-
-def memory_row(
-    image_name,
-    tag,
-    title,
-    text
-):
-
-    col1, col2 = st.columns(
-        [1, 1],
-        gap="large"
-    )
-
-    with col1:
-
-        st.markdown(
-            '<div class="photo-frame">',
-            unsafe_allow_html=True
-        )
-
-        photo(image_name)
-
-        st.markdown(
-            '</div>',
-            unsafe_allow_html=True
-        )
-
-    with col2:
-
-        st.markdown(
-            f"""
-            <div class="mem-card">
-
-                <div class="mem-tag">
-                    {tag}
-                </div>
-
-                <h3>
-                    {title}
-                </h3>
-
-                <p>
-                    {text}
-                </p>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    st.write("")
-
-
-# ============================================================
-# PAGE
+# PAGE 0
 # ============================================================
 
 page = st.session_state.page
 
 
-# ============================================================
-# PROGRESS
-# ============================================================
-
-if page > 0:
-
-    st.markdown(
-        f"""
-        <div class="progress-text">
-            YOUR BIRTHDAY JOURNEY · {page}/{TOTAL-1}
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.progress(
-        page / (TOTAL - 1)
-    )
-
-
-# ============================================================
-# PAGE 0 — CRAZY CUTE SCRAPBOOK
-# ============================================================
-
 if page == 0:
 
-    # Find the photos you already have
-    photos = [
-        (
-            ["first_trip.jpeg", "first_trip"],
-            "our first trip"
-        ),
-        (
-            ["the_view.jpeg", "the_view"],
-            "this view always"
-        ),
-        (
-            ["prettiest_frame.jpeg", "prettiest_frame"],
-            "prettiest frame"
-        ),
-        (
-            ["birthday_final.jpeg", "birthday_final"],
-            "my birthday boy"
-        ),
-    ]
+    st.markdown(
+        """
+<div class="scrapbook">
 
-    html = """
-    <div class="scrapbook">
+    <div class="string one"></div>
+    <div class="string two"></div>
+    <div class="string three"></div>
+    <div class="string four"></div>
 
-        <div class="string one"></div>
-        <div class="string two"></div>
-        <div class="string three"></div>
-        <div class="string four"></div>
 
-        <div class="scrap-center">
+    <!-- PHOTO A -->
 
-            <div class="scrap-eyebrow">
-                made with an unreasonable amount of love
-            </div>
+    <div class="polaroid photo-a">
 
-            <h1>
-                Happiest Birthday,<br>
-                Bunny 💜
-            </h1>
+        <div class="tape"></div>
 
-            <div class="scrap-subtitle">
-                20th August ✨
-                <br><br>
-                Before you go any further, I just want you to know —
-                a great deal of love went into building this,
-                one page at a time.
-            </div>
+        <img src="data:image/jpeg;base64,PHOTO_A">
 
-        </div>
-    """
-
-    positions = [
-        "photo-a",
-        "photo-b",
-        "photo-c",
-        "photo-d",
-    ]
-
-    for i, ((names, caption), position) in enumerate(
-        zip(photos, positions)
-    ):
-
-        path = find_image(names)
-
-        if path:
-
-            ext = path.suffix.lower()
-
-            mime = (
-                "png"
-                if ext == ".png"
-                else "jpeg"
-            )
-
-            b64 = img_to_base64(path)
-
-            html += f"""
-            <div class="polaroid {position}">
-
-                <div class="tape"></div>
-
-                <img
-                    src="data:image/{mime};base64,{b64}"
-                >
-
-                <div class="caption">
-                    {caption} 💜
-                </div>
-
-            </div>
-            """
-
-    html += """
-
-        <div class="note note-a">
-            Mai iske liye biased hu 💜
-        </div>
-
-        <div class="note note-b">
-            I want this view always ✨
-        </div>
-
-        <div class="note note-c">
-            my favourite boy. always.
+        <div class="polaroid-caption">
+            my favourite 🥹
         </div>
 
     </div>
-    """
 
-    st.markdown(
-        html,
-        unsafe_allow_html=True
+
+    <!-- PHOTO B -->
+
+    <div class="polaroid photo-b">
+
+        <div class="tape"></div>
+
+        <img src="data:image/jpeg;base64,PHOTO_B">
+
+        <div class="polaroid-caption">
+            this view 💜
+        </div>
+
+    </div>
+
+
+    <!-- PHOTO C -->
+
+    <div class="polaroid photo-c">
+
+        <div class="tape"></div>
+
+        <img src="data:image/jpeg;base64,PHOTO_C">
+
+        <div class="polaroid-caption">
+            prettiest frame ✨
+        </div>
+
+    </div>
+
+
+    <!-- PHOTO D -->
+
+    <div class="polaroid photo-d">
+
+        <div class="tape"></div>
+
+        <img src="data:image/jpeg;base64,PHOTO_D">
+
+        <div class="polaroid-caption">
+            you. always. 💗
+        </div>
+
+    </div>
+
+
+    <div class="note note-one">
+        mai iske liye baised hu 💜
+    </div>
+
+    <div class="note note-two">
+        I want this view always ✨
+    </div>
+
+    <div class="note note-three">
+        prettiest frame 🥹
+    </div>
+
+
+    <div class="scrap-center">
+
+        <div class="scrap-eyebrow">
+            made with an unreasonable amount of love
+        </div>
+
+        <h1>
+            Happiest Birthday,<br>
+            Bunny 💜
+        </h1>
+
+        <div class="scrap-subtitle">
+
+            20th August ✨
+
+            <br><br>
+
+            Before you go any further, I just want you to know —
+            a great deal of love went into building this,
+            one page at a time.
+
+        </div>
+
+    </div>
+
+</div>
+""".replace(
+            "PHOTO_A",
+            image_base64(find_image("first_trip.jpeg"))
+            if find_image("first_trip.jpeg")
+            else "",
+        )
+        .replace(
+            "PHOTO_B",
+            image_base64(find_image("the_view.jpeg"))
+            if find_image("the_view.jpeg")
+            else "",
+        )
+        .replace(
+            "PHOTO_C",
+            image_base64(find_image("prettiest_frame.jpeg"))
+            if find_image("prettiest_frame.jpeg")
+            else "",
+        )
+        .replace(
+            "PHOTO_D",
+            image_base64(find_image("birthday_final.jpeg"))
+            if find_image("birthday_final.jpeg")
+            else "",
+        ),
+        unsafe_allow_html=True,
     )
 
     st.markdown(
@@ -1676,22 +1214,12 @@ if page == 0:
             but today is entirely yours."
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
-    st.markdown(
-        """
-        <div style="
-            text-align:center;
-            color:#76558d;
-            font-size:.85rem;
-            margin:15px 0 5px;
-        ">
-            Fair warning: you can't skip ahead.
-            Every page has a tiny task waiting for you. 😌
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.caption(
+        "Fair warning: you can't skip ahead. "
+        "Every page has a tiny task waiting for you. 😌"
     )
 
     nav()
@@ -1703,9 +1231,7 @@ if page == 0:
 
 elif page == 1:
 
-    st.markdown(
-        "## A small question, just for you"
-    )
+    st.markdown("## A small question, just for you")
 
     st.markdown(
         """
@@ -1716,24 +1242,21 @@ elif page == 1:
             </div>
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     name = st.text_input(
         "What does your favourite person call you?",
-        placeholder="Type your answer here..."
+        placeholder="Type your answer here...",
     )
 
-    if st.button(
-        "This is definitely me 😌"
-    ):
+    if st.button("This is definitely me 😌"):
 
         if name.strip():
 
             with st.spinner(
                 "🔍 Verifying that you are, in fact, my favourite person..."
             ):
-
                 time.sleep(1)
 
             st.session_state.answers["name"] = name.strip()
@@ -1750,31 +1273,25 @@ elif page == 1:
 
     nav(
         "name" in st.session_state.answers,
-        "Type your answer and tap the button above first 💭"
+        "Type your answer and tap the button above first 💭",
     )
 
 
 # ============================================================
-# PAGE 2 — QUIZ
+# PAGE 2
 # ============================================================
 
 elif page == 2:
 
-    st.markdown(
-        "## How well do you know us? 🎲"
-    )
+    st.markdown("## How well do you know us? 🎲")
 
     st.caption(
         "A tiny, playful relationship quiz. No cheating — I'll know. 💗"
     )
 
     st.markdown(
-        """
-        <div class="quiz-q">
-            1. In a dance-off with zero practice, who takes the win?
-        </div>
-        """,
-        unsafe_allow_html=True
+        '<div class="quiz-q">1. In a dance-off with zero practice, who takes the win?</div>',
+        unsafe_allow_html=True,
     )
 
     q1 = st.radio(
@@ -1782,20 +1299,15 @@ elif page == 2:
         [
             "Me, no contest 💃",
             "You, no contest 🕺",
-            "We'd both lose spectacularly"
+            "We'd both lose spectacularly",
         ],
         index=None,
         label_visibility="collapsed",
-        key="q1_widget"
     )
 
     st.markdown(
-        """
-        <div class="quiz-q">
-            2. Who's more likely to text "you up?" at 1am?
-        </div>
-        """,
-        unsafe_allow_html=True
+        '<div class="quiz-q">2. Who\'s more likely to text "you up?" at 1am?</div>',
+        unsafe_allow_html=True,
     )
 
     q2 = st.radio(
@@ -1803,21 +1315,15 @@ elif page == 2:
         [
             "Me, guilty as charged",
             "You, guilty as charged",
-            "Both of us, shamelessly"
+            "Both of us, shamelessly",
         ],
         index=None,
         label_visibility="collapsed",
-        key="q2_widget"
     )
 
     st.markdown(
-        """
-        <div class="quiz-q">
-            3. Stranded on a desert island, who packs snacks
-            and who packs snacks... for the vibes?
-        </div>
-        """,
-        unsafe_allow_html=True
+        '<div class="quiz-q">3. Stranded on a desert island, who packs snacks and who packs snacks... for the vibes?</div>',
+        unsafe_allow_html=True,
     )
 
     q3 = st.radio(
@@ -1825,20 +1331,15 @@ elif page == 2:
         [
             "Me — practical to a fault",
             "You — practical to a fault",
-            "Neither of us survives a week"
+            "Neither of us survives a week",
         ],
         index=None,
         label_visibility="collapsed",
-        key="q3_widget"
     )
 
     st.markdown(
-        """
-        <div class="quiz-q">
-            4. Real talk — who loves the other person a little more?
-        </div>
-        """,
-        unsafe_allow_html=True
+        '<div class="quiz-q">4. Real talk — who loves the other person a little more?</div>',
+        unsafe_allow_html=True,
     )
 
     q4 = st.radio(
@@ -1846,16 +1347,13 @@ elif page == 2:
         [
             "Me 💜",
             "You 💜",
-            "Honestly, both"
+            "Honestly, both",
         ],
         index=None,
         label_visibility="collapsed",
-        key="q4_widget"
     )
 
-    if st.button(
-        "Submit my very accurate answers"
-    ):
+    if st.button("Submit my very accurate answers"):
 
         if None in (q1, q2, q3, q4):
 
@@ -1870,7 +1368,7 @@ elif page == 2:
                     "q1": q1,
                     "q2": q2,
                     "q3": q3,
-                    "q4": q4
+                    "q4": q4,
                 }
             )
 
@@ -1903,32 +1401,29 @@ elif page == 2:
             <div class="card">
 
                 <div class="small">
-                    According to you:
-                    <b>{a['q1']}</b>
-                    wins the dance-off,
-                    and <b>{a['q2']}</b>
+                    According to you: <b>{a["q1"]}</b>
+                    wins the dance-off, and <b>{a["q2"]}</b>
                     sends the risky 1am text.
                     Noted and filed away. 📝
                 </div>
 
-                <div class="quote"
-                     style="font-size:1.3rem;">
+                <div class="quote">
                     {verdict}
                 </div>
 
             </div>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
     nav(
         "q4" in st.session_state.answers,
-        "Submit your answers first, sneaky 👀"
+        "Submit your answers first, sneaky 👀",
     )
 
 
 # ============================================================
-# PAGE 3 — MEMORIES
+# PAGE 3
 # ============================================================
 
 elif page == 3:
@@ -1945,32 +1440,83 @@ elif page == 3:
             of their own.
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
-    memory_row(
-        "first_trip.jpeg",
-        "Memory 01",
-        "OUR FIRST TRIP",
-        "You are this cute, ofc I am biased for you. ye picture meri favourite hai I never posted it "
-        "becuase i wanted to post on your biwrthday. Will cherish this trip always.",
-    )
+    memories = [
 
-    memory_row(
-        "the_view.jpeg",
-        "Memory 02",
-        "Dates to die for",
-        "I prefer looking at you the same way on each date going forward, "
-        "this is the perfect view i would give on world for.",
-    )
+        (
+            "first_trip.jpeg",
+            "Memory 01",
+            "OUR FIRST TRIP",
+            "You are this cute, ofc I am biased for you. ye picture meri favourite hai I never posted it "
+            "becuase i wanted to post on your biwrthday. Will cherish this trip always.",
+        ),
 
-    memory_row(
-        "prettiest_frame.jpeg",
-        "Memory 03",
-        "Scary car rides",
-        "Little heart attacks is what you give when we are in this setup, "
-        "no worries signing up for these with all my heart",
-    )
+        (
+            "the_view.jpeg",
+            "Memory 02",
+            "Dates to die for",
+            "I prefer looking at you the same way on each date going forward, "
+            "this is the perfect view i would give on world for.",
+        ),
+
+        (
+            "prettiest_frame.jpeg",
+            "Memory 03",
+            "Scary car rides",
+            "Little heart attacks is what you give when we are in this setup, "
+            "no worries signing up for these with all my heart",
+        ),
+
+    ]
+
+    for image, tag, title, text in memories:
+
+        c1, c2 = st.columns(2)
+
+        with c1:
+
+            path = find_image(image)
+
+            if path:
+
+                st.markdown(
+                    '<div class="memory-photo">',
+                    unsafe_allow_html=True,
+                )
+
+                st.image(str(path), width="stretch")
+
+                st.markdown(
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
+
+        with c2:
+
+            st.markdown(
+                f"""
+                <div class="memory-text">
+
+                    <div class="memory-tag">
+                        {tag}
+                    </div>
+
+                    <h3>
+                        {title}
+                    </h3>
+
+                    <p>
+                        {text}
+                    </p>
+
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        st.write("")
 
     nav()
 
@@ -1998,25 +1544,28 @@ elif page == 4:
 
         "I hope you keep choosing the things that make you genuinely happy.",
 
-        "I hope you chase the big dreams, even the ones that feel far away. You deserve everything.",
+        "I hope you chase the big dreams, even the ones that feel far away. "
+        "You deserve everything.",
 
-        "I hope you never forget how capable you truly are. You are the softest guy that i dreamt of.",
+        "I hope you never forget how capable you truly are. "
+        "You are the softest guy that i dreamt of.",
 
         "And on the days you do forget — I'll be here to remind you. 💜",
+
     ]
 
-    html = '<div class="points-grid">'
+    html = '<div class="points">'
 
     for i, text in enumerate(points, 1):
 
         html += f"""
-        <div class="point-card">
+        <div class="point">
 
-            <div class="point-num">
+            <div class="point-number">
                 {i:02}
             </div>
 
-            <div class="point-text">
+            <div>
                 {text}
             </div>
 
@@ -2027,14 +1576,14 @@ elif page == 4:
 
     st.markdown(
         html,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     nav()
 
 
 # ============================================================
-# PAGE 5 — SURPRISE
+# PAGE 5
 # ============================================================
 
 elif page == 5:
@@ -2050,21 +1599,24 @@ elif page == 5:
     choices = {
 
         "💌 A soft one":
-            "I love you more than I could ever fit into a website — and believe me, I tried.",
+            "I love you more than I could ever fit into a website — "
+            "and believe me, I tried.",
 
         "🌙 A gentle tease":
             "You're officially one year older today ( Ab nahi hu tumse badi same same hogye ab ). "
             "Fortunately for you, I've decided to be kind about it. 😊",
 
         "🌱 A future one":
-            "One day we'll look back at this version of us, and be so proud of everything we built together.",
+            "One day we'll look back on this version of us, "
+            "and be so proud of everything we built together.",
+
     }
 
     for label, message in choices.items():
 
         if st.button(
             label,
-            key=f"surprise_{label}"
+            key=f"choice_{label}",
         ):
 
             st.session_state.answers["surprise"] = label
@@ -2087,12 +1639,12 @@ elif page == 5:
 
             </div>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
     nav(
         "surprise" in st.session_state.answers,
-        "Pick a surprise above to continue 🎁"
+        "Pick a surprise above to continue 🎁",
     )
 
 
@@ -2108,143 +1660,111 @@ elif page == 6:
 
     st.markdown(
         """
-        <div style="
-            text-align:center;
-            margin-top:5px;
-        ">
+        <div style="text-align:center;">
 
-            <div style="
-                font-family:'Dancing Script',cursive;
-                font-size:clamp(3rem,8vw,5rem);
-                color:#7c3fa8;
-                line-height:1;
-            ">
-                Cut the Cake
-            </div>
-
-            <div style="
-                color:#76558d;
-                margin-top:8px;
-            ">
+            <div class="small">
                 You have one important birthday duty left to perform.
             </div>
 
+            <h1>
+                Cut the Cake
+            </h1>
+
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     cut = st.session_state.answers.get(
         "cake",
-        False
-    )
-
-    # IMPORTANT:
-    # Everything below is HTML/CSS.
-    # No SVG. No JavaScript. No fragile animation.
-
-    cake_class = "cake-area cutting" if cut else "cake-area"
-
-    st.markdown(
-        f"""
-        <div class="{cake_class}">
-
-            <div class="cake">
-
-                <div class="cake-bottom"></div>
-
-                <div class="cake-cream-bottom"></div>
-
-                <div class="cake-middle"></div>
-
-                <div class="cream"></div>
-
-                <div class="candle c1">
-                    <div class="flame"></div>
-                </div>
-
-                <div class="candle c2">
-                    <div class="flame"></div>
-                </div>
-
-                <div class="candle c3">
-                    <div class="flame"></div>
-                </div>
-
-            </div>
-
-
-            <div class="knife">
-
-                <div class="knife-blade"></div>
-
-                <div class="knife-handle"></div>
-
-            </div>
-
-
-            <div class="slice">
-
-                <div class="slice-purple"></div>
-
-                <div class="slice-cream"></div>
-
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+        False,
     )
 
     if not cut:
 
         st.markdown(
             """
-            <div style="
-                text-align:center;
-                color:#76558d;
-                margin-top:-5px;
-            ">
-                Fun fact: virtual cake has zero calories.
-                Cut freely. 🍰
+            <div class="cake">
+
+                <div class="cake-body">
+
+                    <div class="cake-bottom"></div>
+
+                    <div class="cake-top"></div>
+
+                    <div class="candle one"></div>
+                    <div class="candle two"></div>
+                    <div class="candle three"></div>
+
+                    <div class="flame one">🔥</div>
+                    <div class="flame two">🔥</div>
+                    <div class="flame three">🔥</div>
+
+                </div>
+
+                <div class="quote">
+                    Make a wish first 🎂
+                </div>
+
             </div>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
+        )
+
+        st.caption(
+            "Fun fact: virtual cake has zero calories. Cut freely. 🍰"
         )
 
         if st.button(
             "🔪 Cut the cake 🎂",
-            key="cut_cake"
+            key="cut_cake",
         ):
 
             st.session_state.answers["cake"] = True
+
+            st.balloons()
 
             st.rerun()
 
     else:
 
-        st.balloons()
-
         st.markdown(
             """
-            <div class="cake-message">
-                🎂✨ You did it! ✨🎂
+            <div class="cake">
+
+                <div style="font-size:5rem;">
+                    🎂🔪✨
+                </div>
+
             </div>
 
-            <div style="
-                text-align:center;
-                color:#76558d;
-                margin-top:5px;
-            ">
-                Make a wish — I have a feeling I already know mine. 💜
+            <div class="cut-message">
+
+                <div style="font-size:3rem;">
+                    🎂✨💜
+                </div>
+
+                <h1>
+                    IT'S YOUR DAY!
+                </h1>
+
+                <p>
+                    Cake successfully cut.
+                </p>
+
+                <div class="quote">
+                    Make a wish —
+                    I have a feeling I already know mine. 💜
+                </div>
+
             </div>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
     nav(
         cut,
-        "You must cut the cake first — no shortcuts 🎂"
+        "You must cut the cake first — no shortcuts 🎂",
     )
 
 
@@ -2254,9 +1774,7 @@ elif page == 6:
 
 elif page == 7:
 
-    st.markdown(
-        "## The Letter"
-    )
+    st.markdown("## The Letter")
 
     st.markdown(
         """
@@ -2265,41 +1783,49 @@ elif page == 7:
             This part, I mean with my whole heart.
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
+    )
+
+    safe_letter = (
+        FINAL_LETTER
+        .strip()
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
     )
 
     st.markdown(
         f"""
-        <div class="letter-card">
+        <div class="letter">
 
             <div class="letter-text">
-                {FINAL_LETTER.strip()}
+                {safe_letter}
             </div>
 
-            <div class="letter-signoff">
+            <div class="signoff">
                 — always yours 💜
             </div>
 
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     st.write("")
 
     felt = st.checkbox(
         "I felt every word of this 💜",
-        key="felt_letter"
+        key="felt_letter",
     )
 
     nav(
         felt,
-        "Take a moment, then check the box above 💭"
+        "Take a moment, then check the box above 💭",
     )
 
 
 # ============================================================
-# PAGE 8 — FINAL SURPRISE
+# PAGE 8 — FINAL PHOTO
 # ============================================================
 
 elif page == 8:
@@ -2309,116 +1835,66 @@ elif page == 8:
     )
 
     st.caption(
-        "Tap the card below to open it. 💜"
+        "You made it all the way here. 💜"
     )
 
-    img_path = find_image(
-        ["birthday_final.jpeg", "birthday_final"]
+    final_image = find_image(
+        "birthday_final.jpeg"
     )
 
-    if img_path:
+    if final_image:
 
-        ext = img_path.suffix.lower()
-
-        mime = (
-            "png"
-            if ext == ".png"
-            else "jpeg"
+        st.markdown(
+            """
+            <div style="
+                background:white;
+                padding:12px;
+                border-radius:25px;
+                box-shadow:
+                    0 20px 60px rgba(91,44,111,.2);
+            ">
+            """,
+            unsafe_allow_html=True,
         )
 
-        b64 = img_to_base64(
-            img_path
+        st.image(
+            str(final_image),
+            width="stretch",
         )
 
-        front = f"""
-        <img
-            src="data:image/{mime};base64,{b64}"
-            alt="Birthday photo"
-        >
-        """
-
-    else:
-
-        front = """
-        <div style="
-            height:100%;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background:#fff;
-            color:#9b5cc7;
-        ">
-            💜 Photo not found
-        </div>
-        """
+        st.markdown(
+            """
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     st.markdown(
-        f"""
-        <div class="flip-card">
+        """
+        <div class="final-page">
 
-            <input
-                type="checkbox"
-                id="flipToggle"
-                class="flip-input"
-            >
+            <div class="final-hearts">
+                💜 💗 🎂 💗 💜
+            </div>
 
-            <label
-                for="flipToggle"
-                class="flip-inner"
-            >
+            <h1>
+                HAPPY<br>
+                BIWRTHDAY AGAIN JI
+            </h1>
 
-                <div class="flip-face flip-front">
+            <p>
+                Saksham —<br>
+                I love celebrating you <br>
+                Biggest biwrthday hugs and kisses to you.
+            </p>
 
-                    {front}
-
-                    <div class="flip-hint">
-                        Tap to open your last surprise 💜
-                    </div>
-
-                </div>
-
-
-                <div class="flip-face flip-back">
-
-                    <div style="
-                        font-size:.7rem;
-                        letter-spacing:3px;
-                        color:#f2699e;
-                        text-transform:uppercase;
-                    ">
-                        The final page
-                    </div>
-
-                    <h1>
-                        HAPPY<br>
-                        BIWRTHDAY AGAIN JI
-                    </h1>
-
-                    <p>
-                        Saksham —<br>
-                        I love celebrating you <br>
-                        Biggest biwrthday hugs and kisses to you.
-                    </p>
-
-                    <div class="quote"
-                         style="font-size:1.4rem;">
-                        "And yes... I would choose you again."
-                    </div>
-
-                    <div style="
-                        font-size:2rem;
-                        margin-top:10px;
-                    ">
-                        💜 💗 🎂 💗 💜
-                    </div>
-
-                </div>
-
-            </label>
+            <div class="quote">
+                "And yes... I would choose you again."
+            </div>
 
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
 
@@ -2432,5 +1908,5 @@ st.markdown(
         Made with an unreasonable amount of love 💜
     </div>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
