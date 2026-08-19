@@ -1,4 +1,5 @@
 import time
+import base64
 import streamlit as st
 from pathlib import Path
 
@@ -292,6 +293,87 @@ p, div, label, span, li {
     margin-top: .5rem;
 }
 
+/* ---------- flip card (final page) ---------- */
+.flip-card {
+    perspective: 1200px;
+    width: 100%;
+    max-width: 420px;
+    margin: 1rem auto 1.5rem;
+}
+.flip-toggle-input { display: none; }
+.flip-card-inner {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding-top: 125%;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform .9s cubic-bezier(.4,.2,.2,1);
+}
+.flip-toggle-input:checked + .flip-card-inner {
+    transform: rotateY(180deg);
+}
+.flip-card-face {
+    position: absolute;
+    inset: 0;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 26px;
+    box-shadow: 0 18px 45px rgba(124, 63, 168, .2);
+    overflow: hidden;
+}
+.flip-card-front {
+    background: var(--white);
+}
+.flip-card-front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.flip-hint {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: var(--white);
+    background: rgba(94, 43, 131, .6);
+    padding: .6rem;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .3px;
+}
+.flip-card-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(160deg, rgba(255,255,255,.96), rgba(246,235,252,.94));
+    padding: 1.7rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.flip-card-back .eyebrow { margin-bottom: .2rem; }
+.flip-card-back h1 {
+    font-size: clamp(2rem, 8vw, 3rem);
+    margin: .3rem 0;
+    background: linear-gradient(100deg, var(--purple-600), var(--pink-500) 55%, var(--purple-500));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.flip-card-back p {
+    font-size: .92rem;
+    line-height: 1.75;
+    color: var(--ink-soft);
+    margin: 0;
+}
+.flip-card-back .quote {
+    font-size: 1.35rem;
+    padding: .6rem 0;
+}
+
 /* ---------- final page ---------- */
 .final {
     text-align: center;
@@ -468,6 +550,10 @@ def nav(unlocked=True, lock_msg="Finish the task above to unlock this 💭"):
             st.markdown(f'<div class="lock-hint">{lock_msg}</div>', unsafe_allow_html=True)
     elif st.session_state.page == 0:
         st.button("Open your birthday surprise →", on_click=next_page, key="start")
+
+def img_to_base64(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
 
 def photo(name):
     """Display an image, using a container width that works across
@@ -668,18 +754,36 @@ elif page == 7:
     nav(felt, "Take a moment, then check the box above 💭")
 
 elif page == 8:
-    photo("birthday_final.jpeg")
-    st.markdown("""
-    <div class="final">
-        <div class="eyebrow">The final page</div>
-        <h1>HAPPY<br>BIRTHDAY</h1>
-        <p>
-            To my favourite person —<br>
-            may this year be kinder, brighter, and fuller<br>
-            than every year that came before it.
-        </p>
-        <div class="quote">"And yes... I would choose you again."</div>
-        <div style="font-size:2rem;">💜 💗 🎂 💗 💜</div>
+    st.markdown("## One last surprise")
+    st.caption("Tap the card below to open it. 💜")
+
+    img_path = ASSETS / "birthday_final.jpeg"
+    if img_path.exists():
+        b64 = img_to_base64(img_path)
+        front_html = f'<img src="data:image/jpeg;base64,{b64}" alt="Birthday photo" />'
+    else:
+        front_html = '<div class="missing-photo">💜 Photo "birthday_final.jpeg" not found in the assets folder 💜</div>'
+
+    st.markdown(f"""
+    <div class="flip-card">
+        <input type="checkbox" id="flipToggle" class="flip-toggle-input">
+        <label for="flipToggle" class="flip-card-inner">
+            <div class="flip-card-face flip-card-front">
+                {front_html}
+                <div class="flip-hint">Tap to open your last surprise 💜</div>
+            </div>
+            <div class="flip-card-face flip-card-back">
+                <div class="eyebrow">The final page</div>
+                <h1>HAPPY<br>BIRTHDAY</h1>
+                <p>
+                    To my favourite person —<br>
+                    may this year be kinder, brighter, and fuller<br>
+                    than every year that came before it.
+                </p>
+                <div class="quote">"And yes... I would choose you again."</div>
+                <div style="font-size:2rem;">💜 💗 🎂 💗 💜</div>
+            </div>
+        </label>
     </div>
     """, unsafe_allow_html=True)
 
