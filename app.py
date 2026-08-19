@@ -16,27 +16,20 @@ ASSETS = Path(__file__).parent / "assets"
 # whenever you're ready. Everything else in the app will update itself.
 # =========================================================================
 FINAL_LETTER = """
-My dearest,
+Hi bunny,
 
-There are so many things I want to tell you today, and somehow none of
-the words feel big enough. So let me start with the simplest one: thank you.
-Thank you for the person you are, for the warmth you bring into every
-ordinary day, and for making my world softer just by being in it.
+Happiest biwrthday to you. I hope you get everything you wished of in life ahead.
+the words feel big enough. So let me start with the simplest one: Thank you.
+Thank you for the person you are, Thank you for being there in the most caring
+way and for making world softer for everyone around you.
 
-Another year has passed, and with it, another year of us — of quiet
-mornings, silly arguments that end in laughter, and moments I keep
-tucked away because they feel too precious to forget. Watching you grow,
-dream, and become more of yourself has been one of the greatest joys
-of my life.
+Knowingly we are far away , but enjoy with all the love and laughter with all your heart.
+Building this app was a small h=gesture make you feel a little more special.
+Have the best year ahead; manifesting to celebrate rest of your birthdays together in the
+most loving way possible.
 
-I hope this year hands you everything you've been quietly hoping for,
-and even the things you haven't dared to hope for yet. I hope it is
-kind to you. And through all of it, I hope you always know that you
-are deeply, endlessly loved.
-
-Happy birthday, my love.
-
-Forever yours.
+HAPPIEST BIWRTHDAY BABY
+- suhu
 """
 # =========================================================================
 
@@ -436,14 +429,14 @@ if page == 0:
     st.markdown("""
     <div class="hero">
         <div class="eyebrow">A tiny corner of the internet · made only for you</div>
-        <h1>Happy Birthday,<br>Birthday Boy</h1>
+        <h1>20 th August,<br>Happiest Biwrthday Bunny</h1>
         <div class="subtitle">
             Before you go any further, I just want you to know —<br>
             a great deal of love went into building this, one page at a time.
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.markdown('<div class="quote">"Today is entirely yours. But I may have quietly made a little of it about us too."</div>', unsafe_allow_html=True)
+    st.markdown('<div class="quote">"celebrating you everyday but today is entirely yours. Made a little of it about how i Adore you."</div>', unsafe_allow_html=True)
     st.markdown('<div class="divider-heart">💜 · 💗 · 💜</div>', unsafe_allow_html=True)
     nav()
 
