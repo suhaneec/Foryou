@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 from pathlib import Path
 
@@ -18,18 +19,25 @@ ASSETS = Path(__file__).parent / "assets"
 FINAL_LETTER = """
 Hi bunny,
 
-Happiest biwrthday to you. I hope you get everything you wished of in life ahead.
-the words feel big enough. So let me start with the simplest one: Thank you.
-Thank you for the person you are, Thank you for being there in the most caring
-way and for making world softer for everyone around you.
+Happiest birthday to you, my love. I hope you get everything you've
+wished for — and so much more — in the year ahead. There's so much I
+want to say today, and somehow none of the words feel big enough. So
+let me start with the simplest one: thank you.
 
-Knowingly we are far away , but enjoy with all the love and laughter with all your heart.
-Building this app was a small h=gesture make you feel a little more special.
-Have the best year ahead; manifesting to celebrate rest of your birthdays together in the
-most loving way possible.
+Thank you for being exactly who you are. Thank you for caring the way
+you do, and for making the world feel a little softer for everyone
+around you.
 
-HAPPIEST BIWRTHDAY BABY
-- suhu
+I know we're far apart right now, but I hope today is full of love
+and laughter, with your whole heart in it. Building this little app
+was just a small gesture to make you feel a bit more special today.
+
+Here's to the best year ahead — and to celebrating many, many more
+birthdays together, in the most loving way possible.
+
+Happiest birthday, baby.
+
+— suhu
 """
 # =========================================================================
 
@@ -178,11 +186,11 @@ p, div, label, span, li {
     line-height: 1.75;
 }
 
-/* ---------- photo memories ---------- */
+/* ---------- photo memories (left photo / right text) ---------- */
 .photo-frame {
     background: var(--white);
     border-radius: 26px;
-    padding: 14px 14px 8px 14px;
+    padding: 12px;
     box-shadow: 0 18px 45px rgba(124, 63, 168, .18);
     border: 1px solid rgba(255,255,255,.9);
     position: relative;
@@ -192,20 +200,41 @@ p, div, label, span, li {
     border-radius: 18px;
 }
 
-.mem-caption {
-    text-align: center;
-    padding: .7rem .2rem 1.6rem;
+.mem-text-wrap {
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 
-.mem-caption h3 {
-    margin: .3rem 0 .1rem;
-    font-size: 1.6rem;
+.mem-text-card {
+    background: rgba(255,255,255,.72);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(185, 142, 224, .35);
+    border-radius: 22px;
+    padding: 1.3rem 1.4rem;
+    box-shadow: 0 14px 36px rgba(124, 63, 168, .12);
+    text-align: left;
+    width: 100%;
 }
 
-.mem-caption p {
+.mem-text-card .mem-tag {
+    color: var(--pink-500);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: .68rem;
+    font-weight: 600;
+}
+
+.mem-text-card h3 {
+    margin: .25rem 0 .4rem;
+    font-size: 1.45rem;
+}
+
+.mem-text-card p {
     color: var(--ink-soft);
     margin: 0;
     font-size: .95rem;
+    line-height: 1.65;
 }
 
 .missing-photo {
@@ -216,6 +245,10 @@ p, div, label, span, li {
     border: 1px dashed var(--purple-400);
     border-radius: 20px;
     font-size: .9rem;
+}
+
+.memory-row {
+    margin-bottom: 1.8rem;
 }
 
 /* ---------- love letter ---------- */
@@ -320,7 +353,33 @@ div.stButton > button:hover {
     box-shadow: 0 14px 34px rgba(155, 92, 199, .4);
 }
 
-/* ---------- inputs / radio / alerts ---------- */
+div.stButton > button:disabled {
+    background: linear-gradient(90deg, #dcc8ea, #cbb3e0) !important;
+    box-shadow: none;
+    opacity: .8;
+    cursor: not-allowed;
+}
+
+div.stButton > button:disabled p {
+    color: rgba(255,255,255,.85) !important;
+}
+
+/* ---------- lock hint ---------- */
+.lock-hint {
+    text-align: center;
+    color: var(--pink-500);
+    font-size: .82rem;
+    font-weight: 500;
+    margin-top: .6rem;
+    animation: pulseHint 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseHint {
+    0%, 100% { opacity: .65; }
+    50% { opacity: 1; }
+}
+
+/* ---------- inputs / radio / alerts / checkbox ---------- */
 div[data-testid="stTextInput"] input {
     border-radius: 14px !important;
     border: 1px solid var(--purple-400) !important;
@@ -339,6 +398,11 @@ div[data-testid="stRadio"] > div {
     padding: .6rem .8rem;
     border-radius: 16px;
     border: 1px solid rgba(185, 142, 224, .3);
+}
+
+div[data-testid="stCheckbox"] label p {
+    color: var(--ink) !important;
+    font-weight: 500;
 }
 
 div[data-testid="stCaptionContainer"] {
@@ -388,7 +452,7 @@ def next_page():
 def prev_page():
     st.session_state.page = max(st.session_state.page - 1, 0)
 
-def nav():
+def nav(unlocked=True, lock_msg="Finish the task above to unlock this 💭"):
     st.write("")
     if st.session_state.page > 0:
         c1, c2 = st.columns(2)
@@ -396,7 +460,12 @@ def nav():
             st.button("← Back", on_click=prev_page, key=f"back_{st.session_state.page}")
         with c2:
             if st.session_state.page < TOTAL - 1:
-                st.button("Continue →", on_click=next_page, key=f"next_{st.session_state.page}")
+                if unlocked:
+                    st.button("Continue →", on_click=next_page, key=f"next_{st.session_state.page}")
+                else:
+                    st.button("🔒 Continue →", disabled=True, key=f"next_locked_{st.session_state.page}")
+        if not unlocked and st.session_state.page < TOTAL - 1:
+            st.markdown(f'<div class="lock-hint">{lock_msg}</div>', unsafe_allow_html=True)
     elif st.session_state.page == 0:
         st.button("Open your birthday surprise →", on_click=next_page, key="start")
 
@@ -418,6 +487,23 @@ def photo(name):
         )
     st.markdown('</div>', unsafe_allow_html=True)
 
+def memory_row(name, tag, title, text):
+    st.markdown('<div class="memory-row">', unsafe_allow_html=True)
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        photo(name)
+    with col2:
+        st.markdown(f"""
+        <div class="mem-text-wrap">
+            <div class="mem-text-card">
+                <div class="mem-tag">{tag}</div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 # ---------- Pages ----------
 page = st.session_state.page
 
@@ -429,74 +515,93 @@ if page == 0:
     st.markdown("""
     <div class="hero">
         <div class="eyebrow">A tiny corner of the internet · made only for you</div>
-        <h1>20 th August,<br>Happiest Biwrthday Bunny</h1>
+        <h1>20th August,<br>Happiest Birthday, Bunny</h1>
         <div class="subtitle">
             Before you go any further, I just want you to know —<br>
             a great deal of love went into building this, one page at a time.
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.markdown('<div class="quote">"celebrating you everyday but today is entirely yours. Made a little of it about how i Adore you."</div>', unsafe_allow_html=True)
+    st.markdown('<div class="quote">"Celebrating you every day — but today is entirely yours. I just made a little of it about how much I adore you."</div>', unsafe_allow_html=True)
     st.markdown('<div class="divider-heart">💜 · 💗 · 💜</div>', unsafe_allow_html=True)
+    st.caption("Fair warning: you can't skip ahead. Every page has a tiny task waiting for you. 😌")
     nav()
 
 elif page == 1:
     st.markdown("## A small question, just for you")
     st.markdown('<div class="card"><div class="small">There are no wrong answers here — only the one I already know is right. 💜</div></div>', unsafe_allow_html=True)
     name = st.text_input("What does your favourite person call you?", placeholder="Type your answer here...")
-    if st.button("This is definitely me"):
+    if st.button("This is definitely me 😌"):
         if name.strip():
+            with st.spinner("🔍 Verifying that you are, in fact, my favourite person..."):
+                time.sleep(1.1)
             st.session_state.answers["name"] = name.strip()
             st.success("Identity confirmed. And lucky for you, you're stuck with me. 💜")
         else:
             st.warning("You have to type something first — I'm waiting. 😊")
-    nav()
+    unlocked = "name" in st.session_state.answers
+    nav(unlocked, "Type your answer and tap the button above first 💭")
 
 elif page == 2:
     st.markdown("## How well do you know us?")
-    st.caption("A tiny relationship exam. Answer honestly — I'll know if you don't. 💗")
+    st.caption("A tiny relationship exam. No cheating. Answer honestly — I'll know if you don't. 💗")
 
-    q1 = st.radio("Who is a little more dramatic?", ["Me", "You", "We're equally dramatic"], key="q1")
-    q2 = st.radio("Who says \"I'm fine\" while clearly not being fine?", ["Me", "You", "Both of us"], key="q2")
-    q3 = st.radio("Who loves the other person a little more?", ["Me 💜", "You 💜", "Honestly, both"], key="q3")
+    q1 = st.radio("Who is a little more dramatic?", ["Me", "You", "We're equally dramatic"], key="q1_widget")
+    q2 = st.radio("Who says \"I'm fine\" while clearly not being fine?", ["Me", "You", "Both of us"], key="q2_widget")
+    q3 = st.radio("Who loves the other person a little more?", ["Me 💜", "You 💜", "Honestly, both"], key="q3_widget")
 
     if st.button("Submit my very accurate answers"):
         st.session_state.answers.update({"q1": q1, "q2": q2, "q3": q3})
         st.balloons()
-        st.success("Answers received and approved. 💜")
-    nav()
+
+    if "q1" in st.session_state.answers:
+        a = st.session_state.answers
+        if a["q3"].startswith("You"):
+            verdict = "Aww, close call — but I still say it's me. 💜"
+        elif a["q3"].startswith("Me"):
+            verdict = "See? I've been telling you this the whole time. 💜"
+        else:
+            verdict = "The most diplomatic answer in relationship history. Respect. 🫡"
+        st.markdown(f"""
+        <div class="card">
+            <div class="small">
+                According to you: <b>{a['q1']}</b> is more dramatic, and <b>{a['q2']}</b>
+                says "I'm fine" the least convincingly. Noted and filed away. 📝
+            </div>
+            <div class="quote" style="font-size:1.3rem;">{verdict}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    unlocked = "q1" in st.session_state.answers
+    nav(unlocked, "Submit your answers first, sneaky 👀")
 
 elif page == 3:
     st.markdown("## A few of my favourite versions of us")
     st.markdown('<div class="small">Some memories deserve more than just a place in the camera roll — they deserve a little home of their own.</div>', unsafe_allow_html=True)
 
-    photo("first_trip.jpeg")
-    st.markdown("""
-    <div class="mem-caption">
-        <h3>Our first trip</h3>
-        <p>I may be biased, but this is still one of my favourite pictures of you.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    photo("the_view.jpeg")
-    st.markdown("""
-    <div class="mem-caption">
-        <h3>The view</h3>
-        <p>This is a view I hope to keep coming back to, always.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    photo("prettiest_frame.jpeg")
-    st.markdown("""
-    <div class="mem-caption">
-        <h3>The prettiest frame</h3>
-        <p>Some pictures are simply pretty. This one just feels like us.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    memory_row(
+        "first_trip.jpeg",
+        "Memory 01",
+        "Our first trip",
+        "I may be biased, but this is still one of my favourite pictures of you. New places, same us.",
+    )
+    memory_row(
+        "the_view.jpeg",
+        "Memory 02",
+        "The view",
+        "This is a view I hope to keep coming back to, always — preferably with you standing right next to me.",
+    )
+    memory_row(
+        "prettiest_frame.jpeg",
+        "Memory 03",
+        "The prettiest frame",
+        "Some pictures are simply pretty. This one just feels like us — a little candid, a little chaotic, entirely ours.",
+    )
     nav()
 
 elif page == 4:
     st.markdown("## Things I hope you never forget")
+    st.caption("No task here, just a few reminders I need you to keep. Read them slowly. 💜")
     points = [
         "You're allowed to be proud of how far you've come.",
         "You don't have to have everything figured out right now.",
@@ -510,8 +615,8 @@ elif page == 4:
     nav()
 
 elif page == 5:
-    st.markdown("## Pick a little surprise")
-    st.caption("You may open only one. Choose with your heart. 💗")
+    st.markdown("## Pick your poison 😏 (the fun kind)")
+    st.caption("You may open only one. Choose with your heart, not your curiosity. 💗")
 
     choices = {
         "💌 A soft one": "I love you more than I could ever fit into a website — and believe me, I tried.",
@@ -521,15 +626,22 @@ elif page == 5:
     for label, message in choices.items():
         if st.button(label, key=f"surprise_{label}"):
             st.session_state.answers["surprise"] = label
-            st.markdown(f'<div class="card"><div class="quote">{message}</div></div>', unsafe_allow_html=True)
             st.balloons()
-    nav()
+    if "surprise" in st.session_state.answers:
+        message = choices[st.session_state.answers["surprise"]]
+        st.markdown(f'<div class="card"><div class="quote">{message}</div></div>', unsafe_allow_html=True)
+
+    unlocked = "surprise" in st.session_state.answers
+    nav(unlocked, "Pick a surprise above to continue 🎁")
 
 elif page == 6:
     st.markdown("## One last thing before the letter...")
     st.markdown('<div class="hero"><div class="subtitle">You have one important birthday duty left to perform.</div><h1>Cut the Cake</h1></div>', unsafe_allow_html=True)
+    st.caption("Fun fact: virtual cake has zero calories. Cut freely. 🍰")
     cake = st.button("🔪 Cut the cake 🎂")
     if cake:
+        st.session_state.answers["cake"] = True
+    if st.session_state.answers.get("cake"):
         st.balloons()
         st.markdown("""
         <div class="final">
@@ -538,8 +650,9 @@ elif page == 6:
             <p>Make a wish — I have a feeling I already know mine. 💜</p>
         </div>
         """, unsafe_allow_html=True)
-        st.session_state.answers["cake"] = True
-    nav()
+
+    unlocked = st.session_state.answers.get("cake", False)
+    nav(unlocked, "You must cut the cake first — no shortcuts 🎂")
 
 elif page == 7:
     st.markdown("## The Letter")
@@ -550,7 +663,9 @@ elif page == 7:
         <div class="letter-signoff">— always yours 💜</div>
     </div>
     """, unsafe_allow_html=True)
-    nav()
+    st.write("")
+    felt = st.checkbox("I felt every word of this 💜", key="felt_letter")
+    nav(felt, "Take a moment, then check the box above 💭")
 
 elif page == 8:
     photo("birthday_final.jpeg")
