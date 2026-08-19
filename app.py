@@ -80,11 +80,16 @@ html, body, [class*="css"] {
 }
 
 .block-container {
-    max-width: 850px;
+    max-width: 900px;
     padding-top: 1.6rem;
     padding-bottom: 5rem;
     position: relative;
     z-index: 2;
+}
+
+/* tighten default gap between stacked widgets across the app */
+div[data-testid="stVerticalBlock"] {
+    gap: 0.6rem;
 }
 
 h1, h2, h3 {
@@ -121,22 +126,53 @@ p, div, label, span, li {
     100% { transform: translateY(-105vh) translateX(-15px) rotate(-10deg); opacity: 0; }
 }
 
-/* ---------- hero ---------- */
-.hero {
-    text-align: center;
-    padding: 0.6rem 1rem 1.2rem;
+/* ---------- hero (photos left, text right) ---------- */
+.hero-flex {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.2rem, 4vw, 2.6rem);
+    padding: 1rem .5rem 1.4rem;
 }
+.hero-photos-col {
+    flex: 0 0 auto;
+    width: 44%;
+}
+.hero-text-col {
+    flex: 1 1 auto;
+    text-align: right;
+}
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(8px, 1.6vw, 14px);
+}
+.photo-grid img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 3px solid var(--white);
+    box-shadow: 0 10px 24px rgba(124, 63, 168, .28);
+    display: block;
+}
+.photo-grid img.g1 { transform: rotate(-3deg); }
+.photo-grid img.g2 { transform: rotate(2deg); }
+.photo-grid img.g3 { transform: rotate(2deg); }
+.photo-grid img.g4 { transform: rotate(-2deg); }
+.photo-grid img.g5 { transform: rotate(-3deg); }
+.photo-grid img.g6 { transform: rotate(3deg); }
+.photo-grid img.g7 { transform: rotate(-2deg); grid-column: span 2; aspect-ratio: 2 / 1; }
 
 .eyebrow {
     color: var(--pink-500);
     text-transform: uppercase;
-    letter-spacing: 4px;
+    letter-spacing: 3px;
     font-size: .72rem;
     font-weight: 600;
 }
 
-.hero h1 {
-    font-size: clamp(2.4rem, 8vw, 5.4rem);
+.hero-text-col h1 {
+    font-size: clamp(2.1rem, 6.2vw, 4rem);
     line-height: 1.08;
     margin: .5rem 0 1rem;
     background: linear-gradient(100deg, var(--purple-600), var(--pink-500) 55%, var(--purple-500));
@@ -151,37 +187,15 @@ p, div, label, span, li {
     line-height: 1.85;
 }
 
-/* ---------- scattered photo collage (hero) ---------- */
-.hero-photos-wrap {
-    padding-top: .4rem;
+@media (max-width: 700px) {
+    .hero-flex {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.3rem;
+    }
+    .hero-photos-col { width: 100%; }
+    .hero-text-col { text-align: center; }
 }
-.photo-scatter {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: clamp(10px, 3vw, 20px);
-    flex-wrap: wrap;
-    margin: 0 auto 2rem;
-    padding: 0 .5rem;
-    max-width: 640px;
-}
-.scatter-img {
-    width: clamp(54px, 15vw, 76px);
-    height: clamp(54px, 15vw, 76px);
-    object-fit: cover;
-    border-radius: 12px;
-    border: 3px solid var(--white);
-    box-shadow: 0 8px 20px rgba(124, 63, 168, .28);
-    flex-shrink: 0;
-}
-.scatter-img.s1 { transform: rotate(-6deg) translateY(4px); }
-.scatter-img.s2 { transform: rotate(4deg) translateY(-4px); }
-.scatter-img.s3 { transform: rotate(-3deg) translateY(5px); }
-.scatter-img.s4 { transform: rotate(5deg) translateY(-2px); }
-.scatter-img.s5 { transform: rotate(-4deg) translateY(3px); }
-.scatter-img.s6 { transform: rotate(3deg) translateY(4px); }
-.scatter-img.s7 { transform: rotate(-5deg) translateY(-3px); }
-.scatter-img.s8 { transform: rotate(4deg) translateY(1px); }
 
 .divider-heart {
     text-align: center;
@@ -219,6 +233,32 @@ p, div, label, span, li {
     color: var(--ink-soft);
     font-size: .92rem;
     line-height: 1.75;
+}
+
+/* ---------- quiz page ---------- */
+.quiz-q {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: clamp(1.3rem, 4vw, 1.6rem);
+    color: var(--purple-700);
+    margin: .7rem 0 .25rem;
+    line-height: 1.25;
+}
+div[data-testid="stRadio"] {
+    margin-bottom: -.3rem;
+}
+div[data-testid="stRadio"] > div {
+    background: rgba(255,255,255,.55);
+    padding: .45rem .7rem;
+    border-radius: 16px;
+    border: 1px solid rgba(185, 142, 224, .3);
+    gap: .15rem;
+}
+div[data-testid="stRadio"] label,
+div[data-testid="stRadio"] p {
+    color: var(--ink) !important;
+    font-weight: 500;
+    font-size: 1rem;
 }
 
 /* ---------- photo memories (left photo / right text) ---------- */
@@ -592,25 +632,12 @@ div.stButton > button:disabled p {
     50% { opacity: 1; }
 }
 
-/* ---------- inputs / radio / alerts / checkbox ---------- */
+/* ---------- inputs / alerts / checkbox ---------- */
 div[data-testid="stTextInput"] input {
     border-radius: 14px !important;
     border: 1px solid var(--purple-400) !important;
     background: rgba(255,255,255,.85) !important;
     color: var(--ink) !important;
-}
-
-div[data-testid="stRadio"] label,
-div[data-testid="stRadio"] p {
-    color: var(--ink) !important;
-    font-weight: 500;
-}
-
-div[data-testid="stRadio"] > div {
-    background: rgba(255,255,255,.55);
-    padding: .6rem .8rem;
-    border-radius: 16px;
-    border: 1px solid rgba(185, 142, 224, .3);
 }
 
 div[data-testid="stCheckbox"] label p {
@@ -705,7 +732,6 @@ def photo(name):
         try:
             st.image(str(path), use_container_width=True)
         except TypeError:
-            # very old Streamlit versions without use_container_width
             st.image(str(path))
     else:
         st.markdown(
@@ -714,8 +740,8 @@ def photo(name):
         )
     st.markdown('</div>', unsafe_allow_html=True)
 
-def photo_scatter_html():
-    """Small scattered polaroid-style photos for the hero page."""
+def photo_grid_html():
+    """Bigger photo grid for the left side of the hero section."""
     names = ["hero_1", "hero_2", "hero_3", "hero_4",
              "hero_5", "hero_6", "hero_7", "hero_8"]
     exts = [".jpeg", ".jpg", ".png", ".JPEG", ".JPG", ".PNG"]
@@ -734,10 +760,10 @@ def photo_scatter_html():
         if found:
             path, m = found
             b64 = img_to_base64(path)
-            imgs.append(f'<img class="scatter-img s{i}" src="data:image/{m};base64,{b64}">')
+            imgs.append(f'<img class="g{i}" src="data:image/{m};base64,{b64}">')
     if not imgs:
         return ""
-    return '<div class="hero-photos-wrap"><div class="photo-scatter">' + "".join(imgs) + '</div></div>'
+    return '<div class="photo-grid">' + "".join(imgs) + '</div>'
 
 def memory_row(name, tag, title, text):
     st.markdown('<div class="memory-row">', unsafe_allow_html=True)
@@ -783,20 +809,16 @@ def cake_svg(cutting=False):
         </radialGradient>
       </defs>
 
-      <!-- plate -->
       <ellipse cx="200" cy="296" rx="150" ry="14" fill="#7c3fa8" opacity="0.12"/>
       <ellipse cx="200" cy="288" rx="152" ry="16" fill="#f1e3fb"/>
 
-      <!-- landed slice beside the cake -->
       <g class="{landed_class}">
         <polygon points="300,255 335,275 300,290" fill="#c98fe6"/>
         <polygon points="300,255 320,265 300,275" fill="#fff7f0"/>
         <polygon points="300,275 320,265 300,290" fill="#f7c9da"/>
       </g>
 
-      <!-- bottom tier -->
       <rect x="90" y="190" width="220" height="90" rx="16" fill="url(#bottomTierGrad)"/>
-      <!-- cross-section stripes (only visible once the wedge slides away) -->
       <clipPath id="wedgeClip">
         <polygon points="200,193 165,278 235,278"/>
       </clipPath>
@@ -806,20 +828,16 @@ def cake_svg(cutting=False):
         <rect x="150" y="235" width="100" height="21" fill="#fff7f0"/>
         <rect x="150" y="256" width="100" height="22" fill="#f7c9da"/>
       </g>
-      <!-- frosting overlay wedge: matches cake surface, slides away when cut -->
       <g class="{wedge_class}">
         <polygon points="200,193 165,278 235,278" fill="url(#bottomTierGrad)"/>
       </g>
-      <!-- drip frosting on bottom tier -->
       <path d="M90,190 Q100,206 112,190 Q124,208 136,190 Q148,206 160,190 Q172,208 184,190 Q196,206 208,190 Q220,208 232,190 Q244,206 256,190 Q268,208 280,190 Q292,206 310,190 L310,190 L90,190 Z"
             fill="#fbeafc" opacity="0.92"/>
 
-      <!-- top tier -->
       <rect x="130" y="130" width="140" height="66" rx="14" fill="url(#topTierGrad)"/>
       <path d="M130,130 Q140,142 150,130 Q160,144 170,130 Q180,142 190,130 Q200,144 210,130 Q220,142 230,130 Q240,144 250,130 Q260,142 270,130 L270,130 L130,130 Z"
             fill="#ffe6f0" opacity="0.95"/>
 
-      <!-- candles -->
       <g>
         <rect x="147" y="96" width="6" height="36" rx="2" fill="#7c3fa8"/>
         <rect x="172" y="90" width="6" height="42" rx="2" fill="#9b5cc7"/>
@@ -834,7 +852,6 @@ def cake_svg(cutting=False):
         <ellipse class="candle-flame" cx="250" cy="92" rx="5" ry="9" fill="url(#flameGrad)"/>
       </g>
 
-      <!-- knife -->
       <g class="knife-group {knife_class}">
         <rect x="0" y="0" width="128" height="16" rx="5" fill="#e7e2ef" stroke="#c9c1da" stroke-width="1.5"/>
         <rect x="-42" y="-5" width="46" height="26" rx="9" fill="#5e2b83"/>
@@ -852,17 +869,19 @@ if page > 0:
     st.progress(page / (TOTAL - 1))
 
 if page == 0:
-    st.markdown("""
-    <div class="hero">
-        <div class="eyebrow">A tiny corner of the internet · made only for you</div>
-        <h1>20th August,<br>Happiest Birthday, Bunny</h1>
-        <div class="subtitle">
-            Before you go any further, I just want you to know —<br>
-            a great deal of love went into building this, one page at a time.
+    st.markdown(f"""
+    <div class="hero-flex">
+        <div class="hero-photos-col">{photo_grid_html()}</div>
+        <div class="hero-text-col">
+            <div class="eyebrow">A tiny corner of the internet · made only for you</div>
+            <h1>20th August,<br>Happiest Birthday, Bunny</h1>
+            <div class="subtitle">
+                Before you go any further, I just want you to know —
+                a great deal of love went into building this, one page at a time.
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.markdown(photo_scatter_html(), unsafe_allow_html=True)
     st.markdown('<div class="quote">"Celebrating you every day — but today is entirely yours. I just made a little of it about how much I adore you."</div>', unsafe_allow_html=True)
     st.markdown('<div class="divider-heart">💜 · 💗 · 💜</div>', unsafe_allow_html=True)
     st.caption("Fair warning: you can't skip ahead. Every page has a tiny task waiting for you. 😌")
@@ -884,36 +903,51 @@ elif page == 1:
     nav(unlocked, "Type your answer and tap the button above first 💭")
 
 elif page == 2:
-    st.markdown("## How well do you know us?")
-    st.caption("A tiny relationship exam. No cheating. Answer honestly — I'll know if you don't. 💗")
+    st.markdown("## How well do you know us? 🎲")
+    st.caption("A tiny, playful relationship quiz. No cheating — I'll know. 💗")
 
-    q1 = st.radio("Who is a little more dramatic?", ["Me", "You", "We're equally dramatic"], key="q1_widget")
-    q2 = st.radio("Who says \"I'm fine\" while clearly not being fine?", ["Me", "You", "Both of us"], key="q2_widget")
-    q3 = st.radio("Who loves the other person a little more?", ["Me 💜", "You 💜", "Honestly, both"], key="q3_widget")
+    st.markdown('<div class="quiz-q">1. In a dance-off with zero practice, who takes the win?</div>', unsafe_allow_html=True)
+    q1 = st.radio("q1", ["Me, no contest 💃", "You, no contest 🕺", "We'd both lose spectacularly"],
+                   index=None, label_visibility="collapsed", key="q1_widget")
+
+    st.markdown('<div class="quiz-q">2. Who\'s more likely to text "you up?" at 1am?</div>', unsafe_allow_html=True)
+    q2 = st.radio("q2", ["Me, guilty as charged", "You, guilty as charged", "Both of us, shamelessly"],
+                   index=None, label_visibility="collapsed", key="q2_widget")
+
+    st.markdown('<div class="quiz-q">3. Stranded on a desert island, who packs snacks and who packs snacks... for the vibes?</div>', unsafe_allow_html=True)
+    q3 = st.radio("q3", ["Me — practical to a fault", "You — practical to a fault", "Neither of us survives a week"],
+                   index=None, label_visibility="collapsed", key="q3_widget")
+
+    st.markdown('<div class="quiz-q">4. Real talk — who loves the other person a little more?</div>', unsafe_allow_html=True)
+    q4 = st.radio("q4", ["Me 💜", "You 💜", "Honestly, both"],
+                   index=None, label_visibility="collapsed", key="q4_widget")
 
     if st.button("Submit my very accurate answers"):
-        st.session_state.answers.update({"q1": q1, "q2": q2, "q3": q3})
-        st.balloons()
+        if None in (q1, q2, q3, q4):
+            st.warning("Pick an answer for every question first — no skipping 👀")
+        else:
+            st.session_state.answers.update({"q1": q1, "q2": q2, "q3": q3, "q4": q4})
+            st.balloons()
 
-    if "q1" in st.session_state.answers:
+    if "q4" in st.session_state.answers:
         a = st.session_state.answers
-        if a["q3"].startswith("You"):
+        if a["q4"].startswith("You"):
             verdict = "Aww, close call — but I still say it's me. 💜"
-        elif a["q3"].startswith("Me"):
+        elif a["q4"].startswith("Me"):
             verdict = "See? I've been telling you this the whole time. 💜"
         else:
             verdict = "The most diplomatic answer in relationship history. Respect. 🫡"
         st.markdown(f"""
         <div class="card">
             <div class="small">
-                According to you: <b>{a['q1']}</b> is more dramatic, and <b>{a['q2']}</b>
-                says "I'm fine" the least convincingly. Noted and filed away. 📝
+                According to you: <b>{a['q1']}</b> wins the dance-off, and <b>{a['q2']}</b>
+                sends the risky 1am text. Noted and filed away. 📝
             </div>
             <div class="quote" style="font-size:1.3rem;">{verdict}</div>
         </div>
         """, unsafe_allow_html=True)
 
-    unlocked = "q1" in st.session_state.answers
+    unlocked = "q4" in st.session_state.answers
     nav(unlocked, "Submit your answers first, sneaky 👀")
 
 elif page == 3:
@@ -989,7 +1023,7 @@ elif page == 5:
 
 elif page == 6:
     st.markdown("## One last thing before the letter...")
-    st.markdown('<div class="hero"><div class="subtitle">You have one important birthday duty left to perform.</div><h1>Cut the Cake</h1></div>', unsafe_allow_html=True)
+    st.markdown('<div class="hero"><div class="subtitle">You have one important birthday duty left to perform.</div><h1 style="font-family:\'Cormorant Garamond\',serif;text-align:center;background:linear-gradient(100deg,var(--purple-600),var(--pink-500) 55%,var(--purple-500));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-size:clamp(2.4rem,7vw,4rem);">Cut the Cake</h1></div>', unsafe_allow_html=True)
 
     cut = st.session_state.answers.get("cake", False)
     st.markdown(cake_svg(cutting=cut), unsafe_allow_html=True)
