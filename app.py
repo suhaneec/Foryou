@@ -139,7 +139,7 @@ p, div, label, span, li {
     100% { transform: translateY(-105vh) translateX(-15px) rotate(-10deg); opacity: 0; }
 }
 
-/* ---------- hero (page 1): scattered "hanging" photo collage + centered text ---------- */
+/* ---------- hero (page 1): 8 hanging photos + centered text ---------- */
 .eyebrow {
     color: var(--pink-500);
     text-transform: uppercase;
@@ -149,26 +149,64 @@ p, div, label, span, li {
 }
 
 .photo-collage {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    gap: clamp(10px, 2.4vw, 18px);
-    padding: .5rem .5rem .3rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.35rem .7rem;
+    padding: 1rem .35rem 1.3rem;
+    margin-bottom: .2rem;
 }
-.photo-collage img {
-    width: clamp(78px, 15vw, 118px);
-    height: clamp(78px, 15vw, 118px);
+.hanging-photo {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding-top: 18px;
+}
+.hanging-photo::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 20px;
+    background: rgba(94, 43, 131, .45);
+    transform: translateX(-50%);
+}
+.hanging-photo::after {
+    content: "•";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--purple-700);
+    font-size: 1.2rem;
+    line-height: 1;
+}
+.hanging-photo img {
+    width: clamp(68px, 16vw, 112px);
+    height: clamp(68px, 16vw, 112px);
     object-fit: cover;
-    border-radius: 14px;
-    border: 3px solid var(--white);
+    border-radius: 12px;
+    border: 4px solid var(--white);
     box-shadow: 0 10px 22px rgba(124, 63, 168, .26);
     display: block;
 }
-.photo-collage img:nth-child(4n+1) { transform: rotate(-5deg) translateY(-2px); }
-.photo-collage img:nth-child(4n+2) { transform: rotate(3deg)  translateY(12px); }
-.photo-collage img:nth-child(4n+3) { transform: rotate(-2deg) translateY(4px); }
-.photo-collage img:nth-child(4n+4) { transform: rotate(4deg)  translateY(-6px); }
+.hanging-photo:nth-child(4n+1) { transform: rotate(-5deg); }
+.hanging-photo:nth-child(4n+2) { transform: rotate(4deg) translateY(7px); }
+.hanging-photo:nth-child(4n+3) { transform: rotate(-3deg) translateY(3px); }
+.hanging-photo:nth-child(4n+4) { transform: rotate(5deg) translateY(-4px); }
+
+@media (max-width: 520px) {
+    .photo-collage {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.05rem .35rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .hanging-photo img {
+        width: clamp(60px, 21vw, 88px);
+        height: clamp(60px, 21vw, 88px);
+    }
+}
 
 .hero-center {
     text-align: center;
@@ -505,74 +543,91 @@ div[data-testid="stRadio"] p {
     font-size: 1rem;
 }
 
-/* ---------- cake cutting ---------- */
-.cake-wrap {
+/* ---------- simple cake cutting ---------- */
+.simple-cake-wrap {
     display: flex;
     justify-content: center;
-    margin: .5rem auto .8rem;
-    max-width: 400px;
+    margin: 1rem auto 1.3rem;
 }
-.cake-svg {
-    width: 100%;
-    height: auto;
-    overflow: visible;
+
+.simple-cake {
+    position: relative;
+    width: min(320px, 86vw);
+    height: 260px;
 }
-.knife-group {
-    transform-origin: 100px 8px;
+
+.cake-plate {
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    bottom: 18px;
+    height: 22px;
+    border-radius: 50%;
+    background: #f1e3fb;
+    box-shadow: 0 8px 18px rgba(124,63,168,.15);
 }
-.knife-idle {
-    animation: knifeBob 2.4s ease-in-out infinite;
+
+.cake-bottom {
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    bottom: 38px;
+    height: 105px;
+    border-radius: 18px 18px 28px 28px;
+    background: linear-gradient(180deg, #c98fe6, #a56bd1);
+    box-shadow: inset 0 12px 0 rgba(255,255,255,.18);
 }
-@keyframes knifeBob {
-    0%, 100% { transform: translate(0,0) rotate(0deg); }
-    50%      { transform: translate(-3px,5px) rotate(-6deg); }
+
+.cake-top {
+    position: absolute;
+    left: 22%;
+    right: 22%;
+    bottom: 130px;
+    height: 62px;
+    border-radius: 16px 16px 22px 22px;
+    background: linear-gradient(180deg, #ffc2dc, #ff9fc4);
 }
-.knife-cutting {
-    animation: knifePlunge 1.15s cubic-bezier(.5,.05,.4,1) forwards;
+
+.icing {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -5px;
+    height: 24px;
+    border-radius: 50%;
+    background: #fff0f6;
 }
-@keyframes knifePlunge {
-    0%   { transform: translate(35px,-55px) rotate(-14deg); opacity: 0; }
-    18%  { opacity: 1; }
-    55%  { transform: translate(-68px,72px) rotate(6deg); }
-    100% { transform: translate(-64px,80px) rotate(3deg); }
+
+.candles {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 184px;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    font-size: 1.7rem;
 }
-.knife-done {
-    transform: translate(-64px,80px) rotate(3deg);
+
+.simple-cake.cut .cake-slice-gap {
+    position: absolute;
+    right: 7%;
+    top: 0;
+    width: 22%;
+    height: 100%;
+    background: #f6ebfc;
+    clip-path: polygon(20% 0, 100% 10%, 78% 100%, 0 100%);
 }
-.wedge-overlay {
-    transform-origin: 200px 200px;
-}
-.wedge-overlay.sliced {
-    animation: sliceAway 1.05s ease-in .42s forwards;
-}
-.wedge-overlay.sliced-done {
-    opacity: 0;
-}
-@keyframes sliceAway {
-    0%   { transform: translate(0,0) rotate(0deg); opacity: 1; }
-    100% { transform: translate(105px,60px) rotate(26deg); opacity: 0; }
-}
-.landed-slice {
-    opacity: 0;
-}
-.landed-slice.show {
-    animation: fadeInSlice .7s ease forwards;
-    animation-delay: 1.35s;
-}
-.landed-slice.show-static {
-    opacity: 1;
-}
-@keyframes fadeInSlice {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.candle-flame {
-    animation: flicker 1.1s ease-in-out infinite;
-    transform-origin: bottom center;
-}
-@keyframes flicker {
-    0%, 100% { transform: scaleY(1) scaleX(1); opacity: 1; }
-    50%      { transform: scaleY(1.15) scaleX(.92); opacity: .85; }
+
+.cake-cut-message {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -28px;
+    text-align: center;
+    color: var(--purple-700);
+    font-weight: 700;
+    font-size: 1rem;
 }
 
 /* ---------- progress ---------- */
@@ -757,13 +812,26 @@ def photo(name):
     md('</div>')
 
 def collage_html(names):
-    """A row of small rotated 'hanging' polaroid-style photos for the hero."""
+    """Render a hanging photo collage using exact asset filenames."""
     imgs = []
-    for n in names:
-        path, mime = find_asset(n)
-        if path:
+    for filename in names:
+        path = ASSETS / filename
+
+        # Also support the old name-without-extension format if needed.
+        if not path.exists():
+            path, mime = find_asset(filename)
+        else:
+            suffix = path.suffix.lower()
+            mime = "png" if suffix == ".png" else "jpeg"
+
+        if path and path.exists():
             b64 = img_to_base64(path)
-            imgs.append(f'<img src="data:image/{mime};base64,{b64}">')
+            imgs.append(
+                f'<div class="hanging-photo">'
+                f'<img src="data:image/{mime};base64,{b64}" alt="Birthday memory">'
+                f'</div>'
+            )
+
     if not imgs:
         return ""
     return '<div class="photo-collage">' + "".join(imgs) + '</div>'
@@ -785,93 +853,42 @@ def memory_row(name, tag, title, text):
         """)
     md('</div>')
 
-def cake_svg(state="idle"):
-    """A hand-drawn SVG birthday cake with a knife.
-
-    state:
-      "idle"    - knife hovers/bobs above the whole cake
-      "cutting" - knife plunges in once and a slice animates away
-      "done"    - static end-state (already cut), no animation replay
-    """
-    if state == "cutting":
-        knife_class, wedge_class, landed_class = "knife-cutting", "wedge-overlay sliced", "landed-slice show"
-    elif state == "done":
-        knife_class, wedge_class, landed_class = "knife-done", "wedge-overlay sliced-done", "landed-slice show-static"
+def simple_cake_html(cut=False):
+    """Simple birthday cake. No knife animation; the button performs the cut."""
+    if cut:
+        cake = """
+        <div class="simple-cake cut">
+            <div class="cake-plate"></div>
+            <div class="cake-bottom">
+                <div class="cake-slice-gap"></div>
+                <div class="icing"></div>
+            </div>
+            <div class="cake-top">
+                <div class="icing"></div>
+            </div>
+            <div class="candles">
+                <span>🕯️</span><span>🕯️</span><span>🕯️</span>
+            </div>
+            <div class="cake-cut-message">🎂 Cake cut! 🎉</div>
+        </div>
+        """
     else:
-        knife_class, wedge_class, landed_class = "knife-idle", "wedge-overlay", "landed-slice"
+        cake = """
+        <div class="simple-cake">
+            <div class="cake-plate"></div>
+            <div class="cake-bottom">
+                <div class="icing"></div>
+            </div>
+            <div class="cake-top">
+                <div class="icing"></div>
+            </div>
+            <div class="candles">
+                <span>🕯️</span><span>🕯️</span><span>🕯️</span>
+            </div>
+        </div>
+        """
 
-    return f"""
-    <div class="cake-wrap">
-    <svg class="cake-svg" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="bottomTierGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#c98fe6"/>
-          <stop offset="100%" stop-color="#a56bd1"/>
-        </linearGradient>
-        <linearGradient id="topTierGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ffc2dc"/>
-          <stop offset="100%" stop-color="#ff9fc4"/>
-        </linearGradient>
-        <radialGradient id="flameGrad" cx="50%" cy="35%" r="65%">
-          <stop offset="0%" stop-color="#fff3b0"/>
-          <stop offset="55%" stop-color="#ffb703"/>
-          <stop offset="100%" stop-color="#f2699e"/>
-        </radialGradient>
-      </defs>
-
-      <ellipse cx="200" cy="296" rx="150" ry="14" fill="#7c3fa8" opacity="0.12"/>
-      <ellipse cx="200" cy="288" rx="152" ry="16" fill="#f1e3fb"/>
-
-      <g class="{landed_class}">
-        <polygon points="300,255 335,275 300,290" fill="#c98fe6"/>
-        <polygon points="300,255 320,265 300,275" fill="#fff7f0"/>
-        <polygon points="300,275 320,265 300,290" fill="#f7c9da"/>
-      </g>
-
-      <rect x="90" y="190" width="220" height="90" rx="16" fill="url(#bottomTierGrad)"/>
-      <clipPath id="wedgeClip">
-        <polygon points="200,193 165,278 235,278"/>
-      </clipPath>
-      <g clip-path="url(#wedgeClip)">
-        <rect x="150" y="193" width="100" height="21" fill="#fff7f0"/>
-        <rect x="150" y="214" width="100" height="21" fill="#f7c9da"/>
-        <rect x="150" y="235" width="100" height="21" fill="#fff7f0"/>
-        <rect x="150" y="256" width="100" height="22" fill="#f7c9da"/>
-      </g>
-      <g class="{wedge_class}">
-        <polygon points="200,193 165,278 235,278" fill="url(#bottomTierGrad)"/>
-      </g>
-      <path d="M90,190 Q100,206 112,190 Q124,208 136,190 Q148,206 160,190 Q172,208 184,190 Q196,206 208,190 Q220,208 232,190 Q244,206 256,190 Q268,208 280,190 Q292,206 310,190 L310,190 L90,190 Z"
-            fill="#fbeafc" opacity="0.92"/>
-
-      <rect x="130" y="130" width="140" height="66" rx="14" fill="url(#topTierGrad)"/>
-      <path d="M130,130 Q140,142 150,130 Q160,144 170,130 Q180,142 190,130 Q200,144 210,130 Q220,142 230,130 Q240,144 250,130 Q260,142 270,130 L270,130 L130,130 Z"
-            fill="#ffe6f0" opacity="0.95"/>
-
-      <g>
-        <rect x="147" y="96" width="6" height="36" rx="2" fill="#7c3fa8"/>
-        <rect x="172" y="90" width="6" height="42" rx="2" fill="#9b5cc7"/>
-        <rect x="197" y="86" width="6" height="46" rx="2" fill="#7c3fa8"/>
-        <rect x="222" y="90" width="6" height="42" rx="2" fill="#9b5cc7"/>
-        <rect x="247" y="96" width="6" height="36" rx="2" fill="#7c3fa8"/>
-
-        <ellipse class="candle-flame" cx="150" cy="92" rx="5" ry="9" fill="url(#flameGrad)"/>
-        <ellipse class="candle-flame" cx="175" cy="86" rx="5" ry="9" fill="url(#flameGrad)"/>
-        <ellipse class="candle-flame" cx="200" cy="82" rx="5.5" ry="10" fill="url(#flameGrad)"/>
-        <ellipse class="candle-flame" cx="225" cy="86" rx="5" ry="9" fill="url(#flameGrad)"/>
-        <ellipse class="candle-flame" cx="250" cy="92" rx="5" ry="9" fill="url(#flameGrad)"/>
-      </g>
-
-      <g transform="translate(300,20) rotate(-28)">
-        <g class="knife-group {knife_class}">
-          <rect x="0" y="0" width="128" height="16" rx="5" fill="#e7e2ef" stroke="#c9c1da" stroke-width="1.5"/>
-          <rect x="-42" y="-5" width="46" height="26" rx="9" fill="#5e2b83"/>
-          <rect x="-30" y="-1" width="24" height="18" rx="6" fill="#7c3fa8"/>
-        </g>
-      </g>
-    </svg>
-    </div>
-    """
+    return f'<div class="simple-cake-wrap">{cake}</div>'
 
 # ---------- Pages ----------
 page = st.session_state.page
@@ -882,7 +899,17 @@ if page > 0:
 
 if page == 0:
     md('<div class="eyebrow" style="text-align:center;">A tiny corner of the internet · made only for you</div>')
-    md(collage_html(["hero_1", "hero_2", "hero_3", "hero_4"]))
+    # Page 1: all 8 hero photos are shown together as hanging photos.
+    md(collage_html([
+        "hero1.jpeg.jpeg",
+        "hero2.jpeg.jpeg",
+        "hero3.jpeg.jpeg",
+        "hero4.jpeg.jpeg",
+        "hero5.jpeg.jpeg",
+        "hero6.jpeg.jpeg",
+        "hero7.jpeg.jpeg",
+        "hero8.jpeg.jpeg",
+    ]))
     md("""
     <div class="hero-center">
         <h1>20th August,<br>Happiest Birthday, Bunny</h1>
@@ -890,7 +917,6 @@ if page == 0:
         a great deal of love went into building this, one page at a time.</div>
     </div>
     """)
-    md(collage_html(["hero_5", "hero_6", "hero_7", "hero_8"]))
     md('<div class="quote">"Celebrating you every day — but today is entirely yours. I just made a little of it about how much I adore you."</div>')
     md('<div class="divider-heart">💜 · 💗 · 💜</div>')
     st.caption("Fair warning: you can't skip ahead. Every page has a tiny task waiting for you. 😌")
@@ -1036,17 +1062,15 @@ elif page == 6:
 
     cut = st.session_state.answers.get("cake", False)
 
+    md(simple_cake_html(cut=cut))
+
     if not cut:
-        md(cake_svg(state="idle"))
-        st.caption("Fun fact: virtual cake has zero calories. Cut freely. 🍰")
+        st.caption("Your only birthday duty: cut the cake. 🎂")
         if st.button("🔪 Cut the cake 🎂"):
             st.session_state.answers["cake"] = True
-            st.session_state["cake_just_cut"] = True
+            st.balloons()
             st.rerun()
     else:
-        just_cut = st.session_state.pop("cake_just_cut", False)
-        md(cake_svg(state="cutting" if just_cut else "done"))
-        st.balloons()
         md("""
         <div class="final">
             <div style="font-size:4rem;">🎂✨💜</div>
