@@ -669,23 +669,22 @@ elif page == 3:
         "first_trip.jpeg",
         "Memory 01",
         "OUR FIRST TRIP",
-        "You are this cute, ofc I am biased for you. 
-        ye picture meri favourite hai I never posted it 
-        becuase i wanted to post on your biwrthday. Will cherish this trip always.",
+        "You are this cute, ofc I am biased for you. ye picture meri favourite hai I never posted it "
+        "becuase i wanted to post on your biwrthday. Will cherish this trip always.",
     )
     memory_row(
         "the_view.jpeg",
         "Memory 02",
         "Dates to die for",
-        "I prefer looking at you the same way on each date going forward,
-        this is the perfect view i would give on world for.",
+        "I prefer looking at you the same way on each date going forward, "
+        "this is the perfect view i would give on world for.",
     )
     memory_row(
         "prettiest_frame.jpeg",
         "Memory 03",
         "Scary car rides",
-        "Little heart attacks is what you give when we are in this setup,
-        no worries signing up for these with all my heart",
+        "Little heart attacks is what you give when we are in this setup, "
+        "no worries signing up for these with all my heart",
     )
     nav()
 
@@ -694,8 +693,8 @@ elif page == 4:
     st.caption("No task here, just a few reminders I need you to keep. Read them slowly. 💜")
     points = [
         "We are proud of you and love celebrating you.",
-        "You don't have to have everything figured out right now. Things
-        will fall back to its place gradually so no tensins babu.",
+        "You don't have to have everything figured out right now. Things "
+        "will fall back to its place gradually so no tensins babu.",
         "I hope you keep choosing the things that make you genuinely happy.",
         "I hope you chase the big dreams, even the ones that feel far away. You deserve everything",
         "I hope you never forget how capable you truly are. You are the softest guy that i dreamt of",
@@ -711,8 +710,8 @@ elif page == 5:
 
     choices = {
         "💌 A soft one": "I love you more than I could ever fit into a website — and believe me, I tried.",
-        "🌙 A gentle tease": "You're officially one year older today ( Ab nahi hu tumse badi same same hogye ab ). 
-        Fortunately for you, I've decided to be kind about it. 😊",
+        "🌙 A gentle tease": "You're officially one year older today ( Ab nahi hu tumse badi same same hogye ab ). "
+                             "Fortunately for you, I've decided to be kind about it. 😊",
         "🌱 A future one": "One day we'll look back on this version of us, and be so proud of everything we built together.",
     }
     for label, message in choices.items():
