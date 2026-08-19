@@ -608,12 +608,21 @@ def photo_scatter_html():
              ".JPEG": "jpeg", ".JPG": "jpeg", ".PNG": "png"}
     imgs = []
     for i, n in enumerate(names, 1):
+        found = None
         for ext in exts:
-            p = ASSETS / f"{n}{ext}"
-            if p.exists():
-                b64 = img_to_base64(p)
-                imgs.append(f'<img class="scatter-img s{i}" src="data:image/{mime[ext]};base64,{b64}">')
+            # try normal name first (hero_1.jpeg), then the
+            # accidental double-extension version some uploads get
+            # (hero_1.jpeg.jpeg)
+            for candidate in (ASSETS / f"{n}{ext}", ASSETS / f"{n}{ext}{ext}"):
+                if candidate.exists():
+                    found = (candidate, mime[ext])
+                    break
+            if found:
                 break
+        if found:
+            path, m = found
+            b64 = img_to_base64(path)
+            imgs.append(f'<img class="scatter-img s{i}" src="data:image/{m};base64,{b64}">')
     if not imgs:
         return ""
     return '<div class="photo-scatter">' + "".join(imgs) + '</div>'
